@@ -1,0 +1,2 @@
+bug KoaJS . khi một route không có ctx.respone thì client báo not found 
+method delete không nhận được body , phải chuyển qua method post
