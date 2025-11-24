@@ -1,0 +1,45 @@
+{
+  "name": "@avada/functions",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "production": "node esbuild.config.js --production",
+    "development": "node esbuild.config.js",
+    "watch": "node esbuild.config.js --watch",
+    "eslint-fix": "./node_modules/.bin/eslint --fix ."
+  },
+  "dependencies": {
+    "@avada/common-ui": "0.0.6",
+    "@avada/core": "4.6.0",
+    "@avada/firestore-utils": "0.0.3",
+    "@avada/utils": "^1.0.0",
+    "@google-cloud/firestore": "^8.0.0",
+    "@google-cloud/pubsub": "^5.2.0",
+    "axios": "1.13.2",
+    "babel-core": "^6.26.3",
+    "babel-jest": "30.2.0",
+    "css-loader": "7.1.2",
+    "favicons": "7.2.0",
+    "firebase": "12.6.0",
+    "firebase-admin": "^13.6.0",
+    "firebase-functions": "4.4.1",
+    "firebase-tools": "14.26.0",
+    "graphql-tag": "^2.12.6",
+    "isomorphic-fetch": "^3.0.0",
+    "koa": "^2.16.2",
+    "koa-ejs": "^4.2.0",
+    "koa-router": "^7.4.0",
+    "node-fetch": "^2.6.7",
+    "qs": "^6.11.0",
+    "shopify-api-node": "3.11.0"
+  },
+  "devDependencies": {
+    "chokidar": "^3.5.3",
+    "esbuild": "^0.27.0",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10"
+  }
+}

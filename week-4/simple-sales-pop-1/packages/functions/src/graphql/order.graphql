@@ -1,0 +1,27 @@
+query {
+  orders(first: 30, sortKey: CREATED_AT, reverse: true) {
+    nodes {
+      id
+      createdAt
+      customer {
+        firstName
+      }
+      displayAddress {
+        city
+        country
+      }
+      lineItems(first: 1) {
+        nodes {
+          id
+          name
+          image {
+            url
+          }
+          product {
+            handle
+          }
+        }
+      }
+    }
+  }
+}
