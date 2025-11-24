@@ -1,0 +1,2 @@
+hoc index trong fire store 
+tim hieu chay firebase function khac gi chay koa server
