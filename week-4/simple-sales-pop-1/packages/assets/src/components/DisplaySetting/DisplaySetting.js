@@ -1,20 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import DesktopPositionInput from '../DesktopPositionInput/DesktopPositionInput';
 import { Checkbox, RangeSlider } from '@shopify/polaris';
 
-const DisplaySetting = () => {
-  const [settings, setSettings] = useState({
-    position: 'bottom-left',
-    hideTimeAgo: false,
-    truncateContentText: false,
-    displayDuration: 100, // thời gian mỗi popup hiển thị (seconds)
-    initialDelay: 100, // thời gian đợi trước popup đầu tiên (seconds)
-    gapBetweenPops: 100, // khoảng thời gian giữa hai popup (seconds)
-    maxPopups: 100 // số popup tối đa cho phép hiển thị
-  });
-
+const DisplaySetting = ({ settings, setSettings }) => {
+  // console.log("DisplaySetting settings: ", settings);
   const handleChangeHideTimeAgoCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, hideTimeAgo: newChecked })), []);
-  const handleChangeTrunateContentTextCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, truncateContentText: newChecked })), []);
+  const handleChangeTrunateProductNameCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, truncateProductName: newChecked })), []);
   const handleChangePosition = useCallback(
     value => setSettings(pre => ({ ...pre, position: value })),
     []
@@ -23,16 +14,16 @@ const DisplaySetting = () => {
     value => setSettings(pre => ({ ...pre, displayDuration: value })),
     []
   );
-  const handleChangeInitialDelay = useCallback(
-    value => setSettings(pre => ({ ...pre, initialDelay: value })),
+  const handleChangeFirstDelay = useCallback(
+    value => setSettings(pre => ({ ...pre, firstDelay: value })),
     []
   );
-  const handleChangeGapBetweenPops = useCallback(
-    value => setSettings(pre => ({ ...pre, gapBetweenPops: value })),
+  const handleChangePopsInterval = useCallback(
+    value => setSettings(pre => ({ ...pre, popsInterval: value })),
     []
   );
-  const handleChangeMaxPopups = useCallback(
-    value => setSettings(pre => ({ ...pre, maxPopups: value })),
+  const handleChangeMaxPopupsDisplay = useCallback(
+    value => setSettings(pre => ({ ...pre, maxPopsDisplay: value })),
     []
   );
   const RangeSlidersList = [
@@ -46,24 +37,24 @@ const DisplaySetting = () => {
     },
     {
       label: 'Time before the first pop',
-      value: settings.initialDelay,
-      onChange: handleChangeInitialDelay,
+      value: settings.firstDelay,
+      onChange: handleChangeFirstDelay,
       output: true,
       description: 'The delay time before the first notification',
       unit: 'second(s)'
     },
     {
       label: 'Gap time between two pops',
-      value: settings.gapBetweenPops,
-      onChange: handleChangeGapBetweenPops,
+      value: settings.popsInterval,
+      onChange: handleChangePopsInterval,
       output: true,
       description: 'The time interval between two popup notifications',
       unit: 'second(s)'
     },
     {
       label: 'Maximum of popups',
-      value: settings.maxPopups,
-      onChange: handleChangeMaxPopups,
+      value: settings.maxPopsDisplay,
+      onChange: handleChangeMaxPopupsDisplay,
       output: true,
       description:
         'The maximum number of popups are allowed to show after page loading . Maximum number is 80 ',
@@ -72,6 +63,7 @@ const DisplaySetting = () => {
   ];
   return (
     <div>
+
       <div style={{ marginBottom: '20px' }}>
         <span style={{ fontWeight: '500' }}>APPEARANCE</span>
       </div>
@@ -93,8 +85,8 @@ const DisplaySetting = () => {
       <div style={{ margin: '10px 0px' }}>
         <Checkbox
           label="Truncate content text"
-          checked={settings.truncateContentText}
-          onChange={handleChangeTrunateContentTextCheckbox}
+          checked={settings.truncateProductName}
+          onChange={handleChangeTrunateProductNameCheckbox}
         />
         <p style={{ paddingLeft: '25px', color: 'gray' }}>
           If your product name is long for one line, it will be truncated to 'Product na...'

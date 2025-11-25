@@ -4,13 +4,7 @@ import { Button, Card, Text } from '@shopify/polaris';
 
 import NotificationPopup from '../../components/NotificationPopup/NotificationPopup';
 const HomeCustome = () => {
-    const { data, fetchApi } = useFetchApi('');
-    useEffect(() => {
-        const getData = async () => {
-            await fetchApi('/test/helloworld', null, true);
-        }
-        getData();
-    }, []);
+
 
     return (
         <div>

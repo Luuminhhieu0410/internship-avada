@@ -4,7 +4,7 @@ import apiSaHandler from './handlers/apiSa';
 import authHandler from './handlers/auth';
 import authSaHandler from './handlers/authSa';
 import embedAppHandler from './handlers/embed';
-
+import webhooksHandler from './handlers/webhooks'
 export const embedApp = functions
   .runWith({ memory: '256MB' })
   .region('us-central1', 'us-east1', 'europe-west2', 'asia-northeast1')
@@ -15,4 +15,6 @@ export const apiSa = functions.https.onRequest(apiSaHandler.callback());
 
 export const auth = functions.https.onRequest(authHandler.callback());
 export const authSa = functions.https.onRequest(authSaHandler.callback());
+
+export const webhooks = functions.https.onRequest(webhooksHandler.callback())
 // console.log(123)

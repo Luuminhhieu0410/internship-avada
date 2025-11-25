@@ -34,6 +34,7 @@ export default function useFetchApi({
       const separateChar = path.includes('?') ? '&' : '?';
       const query = params ? separateChar + stringify(params) : '';
       const resp = await api(path + query);
+      // console.log("API Response from ", path + query, ": ", resp);
       if (resp.hasOwnProperty('pageInfo')) setPageInfo(resp.pageInfo);
       if (resp.hasOwnProperty('count')) setCount(resp.count);
       if (resp.hasOwnProperty('total')) setTotal(resp.total);
@@ -41,7 +42,9 @@ export default function useFetchApi({
         let newData = presentData ? presentData(resp.data) : resp.data;
         if (!Array.isArray(newData)) {
           newData = { ...defaultData, ...newData };
+
         }
+        // console.log("Merged newData: ", newData);
         setData(prev => {
           if (!keepPreviousData) {
             return newData;

@@ -5,7 +5,7 @@ export async function getSetting(ctx) {
         const shop = getCurrentShopData(ctx);
         // console.log(">>>> shop data in settingsController.js: ", shop);
         const settings = await getSettingsByShopId(shop.id);
-        ctx.body = { shop, settings, success: true };
+        ctx.body = { success: true, data: settings, };
     } catch (e) {
         console.error(e);
         ctx.body = { shop: null, settings: null, success: false };

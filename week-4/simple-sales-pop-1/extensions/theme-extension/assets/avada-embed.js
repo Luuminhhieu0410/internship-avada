@@ -1,5 +1,5 @@
 (function() {
-  const BASE_URL = 'https://arise-stands-media-multi.trycloudflare.com/scripttag';
+  const BASE_URL = 'https://rose-sectors-salmon-richardson.trycloudflare.com/scripttag';
 
   const scriptElement = document.createElement('script');
   scriptElement.type = 'text/javascript';
