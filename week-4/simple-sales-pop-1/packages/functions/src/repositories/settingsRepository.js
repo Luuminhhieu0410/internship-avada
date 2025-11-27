@@ -19,3 +19,11 @@ export async function addSettingForShop(shopId, settings) {
         throw new Error('Error adding settings: ' + error.message);
     }
 }
+export async function updateSettingsByShopId(shopId, settings) {
+    try {
+        await settingsRef.doc(shopId).set(settings, { merge: true });
+        return settings;
+    } catch (error) {
+        throw new Error('Error upserting settings: ' + error.message);
+    }
+}

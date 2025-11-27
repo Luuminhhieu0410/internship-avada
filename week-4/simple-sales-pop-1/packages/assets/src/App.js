@@ -12,7 +12,7 @@ import { isEmbeddedApp } from '@assets/config/app';
 import AppEmbeddedLayout from '@assets/layouts/EmbeddedLayout/AppEmbeddedLayout';
 import AppFullLayout from '@assets/layouts/FullLayout/AppFullLayout';
 import { MaxModalProvider } from '@assets/contexts/maxModalContext';
-
+import './global.css'
 /**
  * The main endpoint of application contains all routes, settings for redux and Polaris
  *

@@ -3,7 +3,8 @@ import * as sampleController from '@functions/controllers/sampleController';
 import * as shopController from '@functions/controllers/shopController';
 import * as subscriptionController from '@functions/controllers/subscriptionController';
 import * as appNewsController from '@functions/controllers/appNewsController';
-import * as settingsController from '../controllers/settingsController.js';
+// import settingRouter from './setting.js';
+import *  as settingsController from '@functions/controllers/settingsController.js';
 import { getApiPrefix } from '@functions/const/app';
 
 export default function apiRouter(isEmbed = false) {
@@ -18,6 +19,8 @@ export default function apiRouter(isEmbed = false) {
   router.put('/subscriptions', subscriptionController.updateOne);
   router.delete('/subscriptions/:id', subscriptionController.deleteOne);
 
+  // router.use('/settings',settingRouter.routes() , settingRouter.allowedMethods());
   router.get('/settings', settingsController.getSetting);
+  router.put('/settings', settingsController.updateSetting);
   return router;
 }

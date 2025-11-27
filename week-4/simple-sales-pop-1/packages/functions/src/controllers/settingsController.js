@@ -1,5 +1,5 @@
 import { getCurrentShopData } from '../helpers/auth';
-import { getSettingsByShopId } from '@functions/repositories/settingsRepository';
+import { getSettingsByShopId  , updateSettingsByShopId} from '@functions/repositories/settingsRepository';
 export async function getSetting(ctx) {
     try {
         const shop = getCurrentShopData(ctx);
@@ -12,3 +12,17 @@ export async function getSetting(ctx) {
     }
 }
 
+
+export async function updateSetting(ctx) {
+    try {
+        const shop = getCurrentShopData(ctx);
+        const newSettings = ctx.request.body;
+        console.log(">>>> new settings in settingsController.js: ", newSettings);
+        // Cập nhật hoặc tạo mới setting
+        const updatedSettings = await updateSettingsByShopId(shop.id, newSettings);
+        ctx.body = { success: true, data: updatedSettings, };
+    } catch (e) {
+        console.error(e);
+        ctx.body = { shop: null, settings: null, success: false };
+    }
+}

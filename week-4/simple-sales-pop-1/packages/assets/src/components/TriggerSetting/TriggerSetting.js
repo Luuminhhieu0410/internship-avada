@@ -1,208 +1,204 @@
-import { Select, LegacyStack, Tag } from '@shopify/polaris';
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { Select, LegacyStack, Tag, Autocomplete } from '@shopify/polaris';
+import { useState, useCallback, useEffect } from 'react';
 
-const TriggerSetting = ({ settings, setSettings }) => {
-    const specificPageOptions = [
-        { label: 'All Page', value: 'all' },
-        { label: 'Specific Page', value: 'specific' },
-    ];
+const ALL_OPTIONS = [
+  { value: '/', label: 'Homepage' },
+  { value: '/collections/all', label: 'All Products' },
+  { value: '/collections', label: 'Collections page' },
+  { value: '/products', label: 'All product pages' },
+  { value: '/cart', label: 'Cart page' },
+  { value: '/checkout', label: 'Checkout page' },
+  { value: '/blogs', label: 'Blog index' },
+  { value: '/pages/about-us', label: 'About Us' },
+  { value: '/pages/contact', label: 'Contact' },
+  { value: '/account', label: 'Account pages' },
+  { value: '/search', label: 'Search page' },
+];
 
-    const handleSelectChange = useCallback((value) => {
-        setSettings(prev => ({ ...prev, allShow: value }));
-    }, []);
+const specificPageOptions = [
+  { label: "Show on ALL pages", value: "all" },
+  { label: "Show ONLY selected pages", value: "include" },
+  { label: "Show on ALL EXCEPT selected pages", value: "exclude" },
+];
 
-    // Danh sách gợi ý
-    const allSuggestions = useMemo(() => [
-        { value: 'rustic', label: 'Rustic' },
-        { value: 'antique', label: 'Antique' },
-        { value: 'vinyl', label: 'Vinyl' },
-        { value: 'vintage', label: 'Vintage' },
-        { value: 'refurbished', label: 'Refurbished' },
-        { value: 'cotton', label: 'Cotton' },
-        { value: 'summer', label: 'Summer' },
-        { value: 'modern', label: 'Modern' },
-    ], []);
+const parseUrls = (str) => (str ? str.split(',').map(s => s.trim()).filter(Boolean) : []);
 
-    const [selectedTags, setSelectedTags] = useState(['rustic']);
-    const [inputValue, setInputValue] = useState('');
-    const [filteredSuggestions, setFilteredSuggestions] = useState(allSuggestions);
-    const [showSuggestions, setShowSuggestions] = useState(false);
+export default function TriggerSetting({ initSettings, settings, setSettings }) {
 
-    const inputRef = useRef(null);
+  const getInitialMode = () => {
+    if (initSettings.allShow === 'all') return 'all';
+    if (initSettings.includeUrls == "") return 'exclude';
+    if (initSettings.excludeUrls == "") return 'include';
+    return 'all';
+  };
 
-    // Thêm tag
-    const addTag = useCallback((value) => {
-        const trimmed = value.trim();
-        if (!trimmed) return;
+  const [mode, setMode] = useState(getInitialMode());
 
-        const matched = allSuggestions.find(
-            s => s.label.toLowerCase() === trimmed.toLowerCase() ||
-                s.value.toLowerCase() === trimmed.toLowerCase()
-        );
+  useEffect(() => {
+    setMode(getInitialMode());
+  }, [initSettings]);
 
-        const tagValue = matched ? matched.value : trimmed.toLowerCase().replace(/\s+/g, '_');
+  const [includeSelected, setIncludeSelected] = useState(parseUrls(initSettings.includeUrls));
+  const [excludeSelected, setExcludeSelected] = useState(parseUrls(initSettings.excludeUrls));
 
-        if (!selectedTags.includes(tagValue)) {
-            setSelectedTags(prev => [...prev, tagValue]);
-        }
-        setInputValue('');
-        setShowSuggestions(false);
-    }, [allSuggestions, selectedTags]);
+  const [includeInput, setIncludeInput] = useState('');
+  const [excludeInput, setExcludeInput] = useState('');
+  const [includeOptions, setIncludeOptions] = useState(ALL_OPTIONS);
+  const [excludeOptions, setExcludeOptions] = useState(ALL_OPTIONS);
 
-    // Xử lý khi gõ
-    const handleInputChange = useCallback((e) => {
-        const value = e.target.value;
-        setInputValue(value);
-        setShowSuggestions(true);
 
-        if (!value) {
-            setFilteredSuggestions(allSuggestions);
-            return;
-        }
+  useEffect(() => {
+    setIncludeSelected(parseUrls(initSettings.includeUrls));
+    setExcludeSelected(parseUrls(initSettings.excludeUrls));
+  }, [initSettings]);
 
-        const filtered = allSuggestions.filter(s =>
-            s.label.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredSuggestions(filtered);
-    }, [allSuggestions]);
+  useEffect(() => {
+    if (mode === 'all') {
+      setSettings(prev => ({
+        ...prev,
+        allShow: 'all',
+        includeUrls: '',
+        excludeUrls: '',
+      }));
+    } else if (mode === 'include') {
+      setSettings(prev => ({
+        ...prev,
+        allShow: 'specific',
+        includeUrls: includeSelected.join(','),
+        excludeUrls: '',
+      }));
+    } else if (mode === 'exclude') {
+      setSettings(prev => ({
+        ...prev,
+        allShow: 'specific',
+        includeUrls: '',
+        excludeUrls: excludeSelected.join(','),
+      }));
+    }
+  }, [mode, includeSelected, excludeSelected, setSettings]);
 
-    // Nhấn Enter hoặc phẩy
-    const handleKeyDown = useCallback((e) => {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            addTag(inputValue);
-        } else if (e.key === 'Backspace' && !inputValue && selectedTags.length > 0) {
-            // Xóa tag cuối khi bấm Backspace và input rỗng
-            setSelectedTags(prev => prev.slice(0, -1));
-        }
-    }, [inputValue, selectedTags, addTag]);
+  const handleSelectChange = useCallback((value) => {
+    setMode(value);
+    
+    if (value === 'include') {
+      setExcludeSelected([]);
+    } else if (value === 'exclude') {
+      setIncludeSelected([]);
+    } else {
+      setIncludeSelected([]);
+      setExcludeSelected([]);
+    }
+  }, []);
 
-    // Click vào gợi ý
-    const handleSuggestionClick = useCallback((suggestion) => {
-        addTag(suggestion.label);
-        inputRef.current?.focus();
-    }, [addTag]);
+  const updateText = useCallback((type, value) => {
+    const isInclude = type === 'include';
+    const setInput = isInclude ? setIncludeInput : setExcludeInput;
+    const setOptions = isInclude ? setIncludeOptions : setExcludeOptions;
 
-    // Xóa tag
-    const removeTag = useCallback((tagToRemove) => {
-        setSelectedTags(prev => prev.filter(t => t !== tagToRemove));
-    }, []);
+    setInput(value);
 
-    // Click ngoài để ẩn gợi ý
-    const handleClickOutside = useCallback(() => {
-        setShowSuggestions(false);
-    }, []);
+    if (!value) {
+      setOptions(ALL_OPTIONS);
+      return;
+    }
+
+    const filtered = ALL_OPTIONS.filter(page =>
+      page.label.toLowerCase().includes(value.toLowerCase())
+    );
+
+    if (value.trim() && (value.startsWith('/') || value.includes('.'))) {
+      const customValue = value.trim();
+ 
+        filtered.push({ value: customValue, label: `${customValue} (custom)` });
+      
+    }
+
+    setOptions(filtered);
+  }, []);
+
+  const onSelectOption = useCallback((type, selected) => {
+    const isInclude = type === 'include';
+    if (isInclude) {
+      setIncludeSelected(selected);
+      setIncludeInput('');
+    } else {
+      setExcludeSelected(selected);
+      setExcludeInput('');
+    }
+  }, []);
+
+  const removeTag = useCallback((type, tagToRemove) => {
+    if (type === 'include') {
+      setIncludeSelected(prev => prev.filter(v => v !== tagToRemove));
+    } else {
+      setExcludeSelected(prev => prev.filter(v => v !== tagToRemove));
+    }
+  }, []);
+
+  const renderTags = (type) => {
+    const selected = type === 'include' ? includeSelected : excludeSelected;
 
     return (
-        <div>
-            <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-                PAGES RESTRICTION
-            </div>
-
-            <Select
-                label="Show on"
-                options={specificPageOptions}
-                onChange={handleSelectChange}
-                value={settings.allShow}
-            />
-
-            {/* Tags Input tự code */}
-            <div style={{ marginTop: '20px' }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
-                    Tags
-                </div>
-
-                <div style={{ position: 'relative' }}>
-                    {/* Khu vực chứa tag + input */}
-                    <div
-                        style={{
-                            border: '1px solid #c4cdd5',
-                            borderRadius: '6px',
-                            padding: '8px',
-                            minHeight: '44px',
-                            background: 'white',
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '8px',
-                            alignItems: 'center',
-                            cursor: 'text',
-                        }}
-                        onClick={() => inputRef.current?.focus()}
-                    >
-                        {/* Các tag đã chọn */}
-                        {selectedTags.map(tag => {
-                            const found = allSuggestions.find(s => s.value === tag);
-                            const label = found ? found.label : tag.replace(/_/g, ' ');
-                            return (
-                                <Tag key={tag} onRemove={() => removeTag(tag)}>
-                                    {label}
-                                </Tag>
-                            );
-                        })}
-
-                        {/* Input thật */}
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={inputValue}
-                            onChange={handleInputChange}
-                            onKeyDown={handleKeyDown}
-                            onFocus={() => setShowSuggestions(true)}
-                            onBlur={handleClickOutside}
-                            placeholder={selectedTags.length === 0 ? "Vintage, cotton, summer" : ""}
-                            style={{
-                                border: 'none',
-                                outline: 'none',
-                                fontSize: '14px',
-                                flex: 1,
-                                minWidth: '120px',
-                                padding: '4px 0',
-                            }}
-                            autoComplete="off"
-                        />
-                    </div>
-
-                    {/* Danh sách gợi ý */}
-                    {showSuggestions && filteredSuggestions.length > 0 && (
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: '100%',
-                                left: 0,
-                                right: 0,
-                                background: 'white',
-                                border: '1px solid #c4cdd5',
-                                borderTop: 'none',
-                                borderRadius: '0 0 6px 6px',
-                                maxHeight: '200px',
-                                overflowY: 'auto',
-                                zIndex: 10,
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                            }}
-                        >
-                            {filteredSuggestions.map(suggestion => (
-                                <div
-                                    key={suggestion.value}
-                                    onMouseDown={(e) => e.preventDefault()} // tránh blur trước khi click
-                                    onClick={() => handleSuggestionClick(suggestion)}
-                                    style={{
-                                        padding: '10px 12px',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                        background: 'white',
-                                    }}
-                                    onMouseEnter={(e) => e.target.style.background = '#f6f6f6'}
-                                    onMouseLeave={(e) => e.target.style.background = 'white'}
-                                >
-                                    {suggestion.label}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+      <LegacyStack spacing="extraTight">
+        {selected.map((value) => {
+          const option = ALL_OPTIONS.find(o => o.value === value);
+          const label = option ? option.value : `${value} (custom)`;
+          return (
+            <Tag key={value} onRemove={() => removeTag(type, value)}>
+              {label}
+            </Tag>
+          );
+        })}
+      </LegacyStack>
     );
-};
+  };
 
-export default TriggerSetting;
+  const renderAutocomplete = (type, label) => {
+    const selected = type === 'include' ? includeSelected : excludeSelected;
+    const inputValue = type === 'include' ? includeInput : excludeInput;
+    const options = type === 'include' ? includeOptions : excludeOptions;
+
+    return (
+      <Autocomplete
+        allowMultiple
+        options={options}
+        selected={selected}
+        onSelect={(selected) => onSelectOption(type, selected)}
+        textField={
+          <Autocomplete.TextField
+            label={label}
+            value={inputValue}
+            onChange={(v) => updateText(type, v)}
+            verticalContent={renderTags(type)}
+            placeholder="Search or type custom URL..."
+            autoComplete="off"
+          />
+        }
+      />
+    );
+  };
+
+  return (
+    <div>
+      <div style={{ marginBottom: '16px', fontWeight: '600' }}>PAGES RESTRICTION</div>
+
+      <Select
+        options={specificPageOptions}
+        onChange={handleSelectChange}
+        value={mode}
+      />
+
+      {mode === 'include' && (
+        <div style={{ marginTop: '16px' }}>
+          {renderAutocomplete('include', 'Show only on these pages')}
+        </div>
+      )}
+
+      {mode === 'exclude' && (
+        <div style={{ marginTop: '16px' }}>
+          {renderAutocomplete('exclude', 'Hide on these pages')}
+        </div>
+      )}
+    </div>
+  );
+}
