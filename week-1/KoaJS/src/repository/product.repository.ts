@@ -5,7 +5,7 @@ import { Product } from "../types/product";
 const DB_PATH = path.join(path.resolve(), "src/database/products.json");
 
 // đọc tất cả product
-export function getAllProduct(): Promise<Product[]> {
+export function getAllProducts(): Promise<Product[]> {
   return new Promise((resolve, reject) => {
     readFile(DB_PATH, "utf-8", (err, data) => {
       if (err) reject(err);
@@ -25,18 +25,23 @@ export function saveAllProduct(products: Product[]): Promise<void> {
 }
 
 // phân trang
-export async function paginationProduct(limit: number, page: number, sort: string) {
+export async function paginationProduct(
+  limit: number,
+  page: number,
+  sort: string
+) {
   if (limit < 0 || page < 0) return;
   const offset = (Math.round(page) - 1) * limit;
 
   try {
-    const allProduct = await getAllProduct();
-    const sliceProduct = allProduct.slice(offset, offset + limit); 
+    const allProduct = await getAllProducts();
+    // sửa slice chạy sau sort
 
     const sortProduct =
       sort === "asc"
-        ? sliceProduct.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
-        : sliceProduct.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        ? allProduct.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        : allProduct.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const sliceProduct = sortProduct.slice(offset, offset + limit);
 
     const totalPages = Math.ceil(allProduct.length / limit);
 
@@ -59,7 +64,7 @@ export async function getProductById(
   productId: number,
   fields?: string[]
 ): Promise<Partial<Product> | null> {
-  const products = await getAllProduct();
+  const products = await getAllProducts();
   const product = products.find((p) => p.id === productId);
 
   if (!product) return null;
@@ -79,15 +84,18 @@ export async function getProductById(
 
 // thêm product mới
 export async function createProduct(newProduct: Product) {
-  const products = await getAllProduct();
+  const products = await getAllProducts();
   products.push(newProduct);
   await saveAllProduct(products);
   return newProduct;
 }
 
 // cập nhật product
-export async function updateProductByProductId(productId: number, updatedData: Partial<Product>) {
-  const products = await getAllProduct();
+export async function updateProductByProductId(
+  productId: number,
+  updatedData: Partial<Product>
+) {
+  const products = await getAllProducts();
   const index = products.findIndex((p) => p.id === productId);
   if (index === -1) return null;
 
@@ -98,9 +106,9 @@ export async function updateProductByProductId(productId: number, updatedData: P
 
 // xóa product
 export async function deleteProductById(productId: number) {
-  const products = await getAllProduct();
+  const products = await getAllProducts();
   const newProducts = products.filter((p) => p.id !== productId);
-  if (newProducts.length === products.length) return false; 
+  if (newProducts.length === products.length) return false;
 
   await saveAllProduct(newProducts);
   return true;

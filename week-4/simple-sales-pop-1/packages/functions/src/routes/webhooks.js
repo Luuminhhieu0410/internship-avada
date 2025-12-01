@@ -1,8 +1,9 @@
 import Router from "koa-router";
-import { getTestEndpoint } from "../controllers/webhooksController";
+import { listenNewOrder } from "../controllers/webhooksController";
 
 const router = new Router({ prefix: "/webhooks" })
 
-router.get('/test', getTestEndpoint);
+
+router.post('/order/create',listenNewOrder);
 
 export default router

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import DesktopPositionInput from '../DesktopPositionInput/DesktopPositionInput';
 import { Checkbox, RangeSlider } from '@shopify/polaris';
 
-const DisplaySetting = ({settings, setSettings }) => {
+const DisplaySetting = ({ settings, setSettings }) => {
   // console.log("DisplaySetting settings: ", settings);
   const handleChangeHideTimeAgoCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, hideTimeAgo: newChecked })), []);
   const handleChangeTrunateProductNameCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, truncateProductName: newChecked })), []);
@@ -69,7 +69,7 @@ const DisplaySetting = ({settings, setSettings }) => {
       </div>
       <div style={{ margin: '10px 0px' }}>
         <DesktopPositionInput
-          label={'Desktop Position : ' + settings.position}
+          label={'Desktop Position : ' + `${settings.position ? settings.position.split("-").map((abc) => abc.charAt(0).toUpperCase() + abc.slice(1)).join(" ") : ""}`}
           value={settings.position}
           onChange={handleChangePosition}
           helpText={'The display position of the pop on the your website.'}

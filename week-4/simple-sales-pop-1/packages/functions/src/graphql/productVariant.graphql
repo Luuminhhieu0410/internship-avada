@@ -1,0 +1,37 @@
+query getVariantById($id: ID!) {
+  productVariant(id: $id) {
+    id
+    title
+    sku
+    price
+    compareAtPrice
+    availableForSale
+    inventoryQuantity
+
+    image {
+      url
+      altText
+    }
+
+    selectedOptions {
+      name
+      value
+    }
+
+    product {
+      id
+      title
+      handle
+      vendor
+      status
+
+      images(first: 10) {
+        edges {
+          node {
+            url
+          }
+        }
+      }
+    }
+  }
+}

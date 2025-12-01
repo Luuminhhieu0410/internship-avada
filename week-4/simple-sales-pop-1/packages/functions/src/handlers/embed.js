@@ -48,7 +48,7 @@ app.use(async ctx => {
   }
 
   const embedHtml = await embedData.text();
-
+  console.log(embedHtml);
   return (ctx.body = embedHtml);
 });
 // Handling all errors

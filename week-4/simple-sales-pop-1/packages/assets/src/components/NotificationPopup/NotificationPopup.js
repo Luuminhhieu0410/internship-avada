@@ -7,7 +7,7 @@ const NotificationPopup = ({
   country = 'United States',
   productName = 'Puffer Jacket With Hidden Hood',
   timestamp = 'a day ago',
-  productImage = 'http://paris.mageplaza.com/images/shop/single/big-1.jpg'
+  productImage = 'https://boostsales.apps.avada.io/assets/placeholder-CWwRPaYX.png'
 }) => {
   return (
     <div className="Avava-SP__Wrapper fadeInUp animated">

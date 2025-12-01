@@ -50,6 +50,10 @@
     ],
     "rewrites": [
       {
+        "source":"/clientApi/**",
+        "function": "clientApi"
+      },
+      {
         "source": "/webhooks/**",
         "function": "webhooks"
       },
