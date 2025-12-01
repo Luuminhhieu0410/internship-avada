@@ -21,3 +21,16 @@ export async function markInitialNotificationSynced(shopId, count = 0) {
     { merge: true }
   );
 }
+
+export async function getShopbyShopifyDomain(shopDomain) {
+  const snapshot = await collection.where("shopifyDomain", "==", shopDomain).get();
+  if (snapshot.empty) {
+    console.log('No matching documents.');
+    return [];
+  }
+  let data = [];
+  snapshot.forEach(doc => {
+    data.push(doc.data())
+  });
+  return data;
+}

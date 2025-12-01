@@ -21,6 +21,7 @@ export async function addSettingForShop(shopId, settings) {
 }
 export async function updateSettingsByShopId(shopId, settings) {
     try {
+        console.log("+++" , settings);
         await settingsRef.doc(shopId).set(settings, { merge: true });
         return settings;
     } catch (error) {

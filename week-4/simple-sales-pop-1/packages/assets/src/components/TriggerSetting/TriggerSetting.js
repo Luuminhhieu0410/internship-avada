@@ -1,6 +1,5 @@
 import { Select, LegacyStack, Tag, Autocomplete } from '@shopify/polaris';
 import { useState, useCallback, useEffect } from 'react';
-
 const ALL_OPTIONS = [
   { value: '/', label: 'Homepage' },
   { value: '/collections/all', label: 'All Products' },
@@ -24,7 +23,7 @@ const specificPageOptions = [
 const parseUrls = (str) => (str ? str.split(',').map(s => s.trim()).filter(Boolean) : []);
 
 export default function TriggerSetting({ initSettings, settings, setSettings }) {
-
+  // console.log('+++',settings);
   const getInitialMode = () => {
     if (initSettings.allShow === 'all') return 'all';
     if (initSettings.includeUrls == "") return 'exclude';
@@ -33,24 +32,24 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
   };
 
   const [mode, setMode] = useState(getInitialMode());
-
-  useEffect(() => {
-    setMode(getInitialMode());
-  }, [initSettings]);
-
   const [includeSelected, setIncludeSelected] = useState(parseUrls(initSettings.includeUrls));
   const [excludeSelected, setExcludeSelected] = useState(parseUrls(initSettings.excludeUrls));
 
   const [includeInput, setIncludeInput] = useState('');
   const [excludeInput, setExcludeInput] = useState('');
+
   const [includeOptions, setIncludeOptions] = useState(ALL_OPTIONS);
   const [excludeOptions, setExcludeOptions] = useState(ALL_OPTIONS);
 
 
   useEffect(() => {
-    setIncludeSelected(parseUrls(initSettings.includeUrls));
-    setExcludeSelected(parseUrls(initSettings.excludeUrls));
-  }, [initSettings]);
+    // reset khi ấn discard
+    if (JSON.stringify(initSettings) === JSON.stringify(settings)) {
+      setIncludeSelected(parseUrls(initSettings.includeUrls));
+      setExcludeSelected(parseUrls(initSettings.excludeUrls));
+      setMode(getInitialMode());
+    }
+  }, [settings]);
 
   useEffect(() => {
     if (mode === 'all') {
@@ -75,11 +74,11 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
         excludeUrls: excludeSelected.join(','),
       }));
     }
-  }, [mode, includeSelected, excludeSelected, setSettings]);
+  }, [mode, includeSelected, excludeSelected]);
 
   const handleSelectChange = useCallback((value) => {
     setMode(value);
-    
+
     if (value === 'include') {
       setExcludeSelected([]);
     } else if (value === 'exclude') {
@@ -108,9 +107,9 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
 
     if (value.trim() && (value.startsWith('/') || value.includes('.'))) {
       const customValue = value.trim();
- 
-        filtered.push({ value: customValue, label: `${customValue} (custom)` });
-      
+
+      filtered.push({ value: customValue, label: `${customValue} (custom)` });
+
     }
 
     setOptions(filtered);

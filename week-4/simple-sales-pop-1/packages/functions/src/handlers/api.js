@@ -9,7 +9,7 @@ import shopifyConfig from '@functions/config/shopify';
 import appConfig from '@functions/config/app';
 import shopifyOptionalScopes from '@functions/config/shopifyOptionalScopes';
 import { afterLoginHandler } from './shopify/afterLogin';
-
+// const { koaBody } = require('koa-body');
 // Initialize all demand configuration for an application
 const api = new App();
 api.proxy = true;
@@ -22,6 +22,7 @@ render(api, {
   viewExt: 'html'
 });
 api.use(createErrorHandler());
+  
 api.use(
   verifyEmbedRequest({
     returnHeader: true,
@@ -45,11 +46,13 @@ api.use(
     }
   })
 );
+
 const router = apiRouter(true);
+// api.use(koaBody());
+
 // Register all routes for the application
 api.use(router.allowedMethods());
 api.use(router.routes());
-
 // Handling all errors
 api.on('error', errorService.handleError);
 

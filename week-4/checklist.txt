@@ -1,1 +1,4 @@
-trong giao diện trigger chưa hiển thị được phần tử trong db mà không thuộc array ALL_PAGES
+ctx.req.body là của firebase function parse body 
+lỗi đôi khi ở build không thàng công do code lỗi 
+nếu loading ở embed admin app load lâu , có thể do lỗi FE 
+tạo webhoooks order/create bằng graphql để test thì  bỏ field "filter": "type:lookbook"

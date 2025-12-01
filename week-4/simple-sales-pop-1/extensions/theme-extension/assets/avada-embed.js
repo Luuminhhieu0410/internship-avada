@@ -1,5 +1,5 @@
 (function() {
-  const BASE_URL = 'https://regional-visitors-vermont-nick.trycloudflare.com/scripttag';
+  const BASE_URL = 'https://statutes-llp-skirts-discussions.trycloudflare.com/scripttag';
 
   const scriptElement = document.createElement('script');
   scriptElement.type = 'text/javascript';

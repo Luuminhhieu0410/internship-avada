@@ -123,7 +123,8 @@ const proxyConfig = {
   '^/authSa(/|(\\?.*)?$)': proxyOptions,
   '^/auth(/|(\\?.*)?$)': proxyOptions,
   '^/apiSa(/|(\\?.*)?$)': proxyOptions,
-  '^/scripttag(/|(\\?.*)?$)': proxyOptions
+  '^/scripttag(/|(\\?.*)?$)': proxyOptions,
+  '^/webhooks(/|(\\?.*)?$)': proxyOptions,
 };
 
 /** @type {ServerOptions} */

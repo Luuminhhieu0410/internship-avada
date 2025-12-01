@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import DesktopPositionInput from '../DesktopPositionInput/DesktopPositionInput';
 import { Checkbox, RangeSlider } from '@shopify/polaris';
 
-const DisplaySetting = ({settings, setSettings }) => {
+const DisplaySetting = ({ settings, setSettings }) => {
   // console.log("DisplaySetting settings: ", settings);
   const handleChangeHideTimeAgoCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, hideTimeAgo: newChecked })), []);
   const handleChangeTrunateProductNameCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, truncateProductName: newChecked })), []);

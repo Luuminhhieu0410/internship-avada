@@ -1,54 +1,75 @@
-import { getCurrentShop, getCurrentShopData } from "../../helpers/auth";
-import { getOrderByAdminApi } from "../../services/settingService";
+import { getCurrentShopData } from "../../helpers/auth";
+import { getOrderByAdminApi } from "../../services/orderService";
 import { Timestamp } from "@google-cloud/firestore";
 import { createNotifications } from "../../repositories/notificationRepository";
-import { getShopById, markInitialNotificationSynced } from "../../repositories/shopRepository";
+import { getShopbyShopifyDomain, markInitialNotificationSynced } from "../../repositories/shopRepository";
 import { addSettingForShop } from "../../repositories/settingsRepository";
 import { DEFFAULT_SETTINGS } from "../../const/setting";
+import { registerWebhook } from "../../services/webhookService";
+
 export async function afterLoginHandler(ctx) {
-    const { id: shopId, shopifyDomain } = getCurrentShopData(ctx);
-    console.log(shopId, " ---- ", shopifyDomain)
-    if (!shopId) return;
-
+    const shopData = getCurrentShopData(ctx);
     try {
-        const shop = await getShopById(shopId);
+  
+        const shop = await getShopbyShopifyDomain(shopData.shopifyDomain);
+        if (shop[0]?.initialNotificationSynced) {
+            console.log("Đã đồng bộ lần đầu");
+            return;
+        }
+        
 
+        const [notifications] = await Promise.all([
+            firstSyncNotification(shopData),
+            addDefaultSetting(shopData.id),
+            registerWebhook(shopData)
+        ]);
 
-        if (shop?.initialNotificationSynced === true) {
-            console.log('đã đồng bộ lần đầu')
+        if (!notifications || notifications.length === 0) {
+            await markInitialNotificationSynced(shopData.id);
             return;
         }
 
-        const [orderData, settings] = await Promise.all([
-            getOrderByAdminApi(ctx),
-            addSettingForShop(shopId, DEFFAULT_SETTINGS)
-        ]);
+        await markInitialNotificationSynced(shopData.id, notifications.length);
 
-        if (!orderData?.orders?.nodes?.length) {
-            await markInitialNotificationSynced(shopId);
-            return;
-        }
-        console.log('set default settings for shop: ', shopId, JSON.stringify(settings));
-        const notifications = orderData.orders.nodes.map((order) => ({
-            firstName: order.customer?.firstName || '',
-            city: order.displayAddress?.city || '',
-            productName: order.lineItems.nodes[0]?.name || '',
-            country: order.displayAddress?.country || '',
-            productId: order.lineItems.nodes[0]?.id,
-            timestamp: Timestamp.fromDate(new Date(order.createdAt)),
-            productImage: order.lineItems.nodes[0]?.image?.url || '',
-            shopId: shopId,
-            shopifyDomain: shopifyDomain,
-        }));
-
-        await Promise.all([
-            createNotifications(notifications),
-            markInitialNotificationSynced(shopId, notifications.length)
-        ]);
-
-        console.log(`Đồng bộ thành công ${notifications.length} notification cho ${shopId}`);
-
+        console.log(
+            `Đồng bộ thành công ${notifications.length} notification cho ${shopData.id}`
+        );
     } catch (error) {
         console.error("Lỗi afterLogin sync notification:", error);
+    }
+}
+
+
+export async function firstSyncNotification(shopData) {
+    try {
+        const orderData = await getOrderByAdminApi(shopData);
+        const nodes = orderData?.orders?.nodes || [];
+        if (nodes.length === 0) return [];
+        
+        const notifications = nodes.map((order) => ({
+            firstName: order.customer?.firstName || "",
+            city: order.displayAddress?.city || "",
+            productName: order.lineItems.nodes[0]?.name || "",
+            country: order.displayAddress?.country || "",
+            productId: order.lineItems.nodes[0]?.id,
+            timestamp: Timestamp.fromDate(new Date(order.createdAt)),
+            productImage: order.lineItems.nodes[0]?.image?.url || "",
+            shopId : shopData.id,
+            shopifyDomain : shopData.shopifyDomain,
+        }));
+
+        await createNotifications(notifications);
+        return notifications;
+    } catch (e) {
+        throw new Error(e.message);
+    }
+}
+
+export async function addDefaultSetting(shopId) {
+    try {
+        await addSettingForShop(shopId, DEFFAULT_SETTINGS);
+        console.log("Set default settings cho shop:", shopId);
+    } catch (error) {
+        throw new Error(error.message);
     }
 }
