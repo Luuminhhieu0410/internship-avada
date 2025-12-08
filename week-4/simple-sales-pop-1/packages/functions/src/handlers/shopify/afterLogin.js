@@ -1,6 +1,5 @@
 import {getCurrentShopData} from '../../helpers/auth';
 import {getOrderByAdminApi} from '../../services/orderService';
-import {Timestamp} from '@google-cloud/firestore';
 import {createNotifications} from '../../repositories/notificationRepository';
 import {
   getShopbyShopifyDomain,
@@ -22,13 +21,9 @@ export async function afterLoginHandler(ctx) {
       firstSyncNotifications(shopData),
       addDefaultSettings(shopData.id),
       registerWebhook(shopData),
+      // registerScripttag(shopData),
       markInitialNotificationSynced(shopData.id, notifications.length)
     ]);
-
-    if (!notifications || notifications.length === 0) {
-      await markInitialNotificationSynced(shopData.id);
-      return;
-    }
 
     console.log(`Đồng bộ thành công ${notifications.length} notification cho ${shopData.id}`);
   } catch (error) {
@@ -51,7 +46,8 @@ export async function firstSyncNotifications(shopData) {
       timestamp: new Date(order.createdAt),
       productImage: order.lineItems.nodes[0]?.image?.url || '',
       shopId: shopData.id,
-      shopifyDomain: shopData.shopifyDomain
+      shopifyDomain: shopData.shopifyDomain,
+      slug: order.lineItems.nodes[0].product.handle
     }));
 
     await createNotifications(notifications);

@@ -1,6 +1,7 @@
 import {prepareShopData} from '@avada/core';
 import shopifyConfig from '../config/shopify';
 import Shopify from 'shopify-api-node';
+import appConfig from '../config/app';
 
 export const API_VERSION = '2024-04';
 
@@ -21,4 +22,19 @@ export function initShopify(shopData, apiVersion = API_VERSION) {
     apiVersion,
     autoLimit: true
   });
+}
+
+export async function registerScripttag(shopData) {
+  const shopify = initShopify(shopData);
+  const currentScripttag = await shopify.scriptTag.list();
+  const checkAvaiableScripttag = currentScripttag.some(
+    scriptTag => scriptTag.src === `${appConfig.baseUrl}/scripttag/avada-sale-pop.min.js}`
+  );
+  if (!checkAvaiableScripttag) {
+    shopify.scriptTag.create({
+      src: `${appConfig.baseUrl}/scripttag/avada-sale-pop.min.js}`,
+      display_scope: 'ONLINE_STORE',
+      cache: 'true'
+    });
+  }
 }

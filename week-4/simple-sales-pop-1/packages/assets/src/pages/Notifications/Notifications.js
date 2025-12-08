@@ -1,16 +1,16 @@
-import {useEffect, useMemo, useState, useCallback} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {
-  Card,
-  Text,
   Banner,
-  Button,
   Box,
+  Button,
+  Card,
+  LegacyStack,
+  Modal,
   ResourceItem,
   ResourceList,
-  Modal,
-  LegacyStack,
-  TextContainer,
-  Select
+  Select,
+  Text,
+  TextContainer
 } from '@shopify/polaris';
 import NotificationPopup from '../../components/NotificationPopup/NotificationPopup';
 import useFetchApi from '../../hooks/api/useFetchApi';
@@ -191,14 +191,16 @@ const Notifications = () => {
       </Box>
 
       <div style={{height: '20px'}}></div>
-      <div style={{maxWidth: '150px'}}>
-        <Select
-          disabled={loading || deleting || editing}
-          label="Notifications per page "
-          options={optionsSelectPageSize}
-          onChange={handleSelectChangePageSize}
-          value={pageSize}
-        />
+      <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+        <div style={{maxWidth: '150px'}}>
+          <Select
+            disabled={loading || deleting || editing}
+            label="Notifications per page "
+            options={optionsSelectPageSize}
+            onChange={handleSelectChangePageSize}
+            value={pageSize}
+          />
+        </div>
       </div>
       <div style={{height: '20px'}}></div>
 
@@ -244,8 +246,8 @@ const Notifications = () => {
           {!loading && (
             <div style={{textAlign: 'center'}}>
               <Text variant="headingSm" as="h6" color="subdued">
-                Hiển thị {startRecord}-{endRecord} trong tổng số {pageInfo.totalNotifications}{' '}
-                notification
+                Showing {startRecord}-{endRecord} of a total of {pageInfo.totalNotifications}{' '}
+                notifications
               </Text>
             </div>
           )}

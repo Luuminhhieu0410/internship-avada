@@ -1,5 +1,4 @@
 import {Firestore} from '@google-cloud/firestore';
-import {Timestamp} from 'firebase-admin/firestore';
 
 const firestore = new Firestore();
 
@@ -16,7 +15,7 @@ export async function createNotifications(notifications) {
     console.log('Notifications created successfully');
   } catch (error) {
     console.log('Error creating notifications: ', error);
-    throw new Error('Failed to create notifications');
+    throw error;
   }
 }
 
@@ -26,9 +25,10 @@ export async function createNotification(notification) {
     return {
       id: doc.id,
       ...doc
-    }
+    };
   } catch (e) {
-    throw new Error('Failed to create notification');
+    console.log(e);
+    throw e;
   }
 }
 
@@ -40,7 +40,7 @@ export async function getNotification({
   sortBy = 'desc'
 } = {}) {
   try {
-    // Lấy query chính
+    // lấy query chính
     let query = notificationsRef
       .where('shopId', '==', shopId)
       .orderBy('timestamp', sortBy)
@@ -56,7 +56,6 @@ export async function getNotification({
       if (firstDoc.exists) query = query.endBefore(firstDoc).limitToLast(limit);
     }
 
-    // Thực hiện query
     const [snapshot, countNotificationSnapshot] = await Promise.all([
       query.get(),
       notificationsRef
@@ -65,7 +64,6 @@ export async function getNotification({
         .get()
     ]);
 
-    // Chuyển dữ liệu
     const data = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
@@ -118,7 +116,7 @@ export async function getNotification({
     };
   } catch (error) {
     console.error('notificationRepository Error:', error);
-    throw new Error(error.message || 'Failed to fetch notifications');
+    throw error;
   }
 }
 
@@ -132,7 +130,8 @@ export async function deleteNotifications(shopId, notificationIds) {
     await batch.commit();
     console.log('Notifications deleted successfully');
   } catch (error) {
-    throw new Error('Failed to delete notifications');
+    console.log(error);
+    throw error;
   }
 }
 
@@ -165,6 +164,27 @@ export async function deleteAllNotifications(shopId) {
     console.log('All notifications deleted successfully.');
   } catch (error) {
     console.error('Error deleting notifications:', error);
-    throw new Error(error.message || 'Failed to delete notifications');
+    throw error;
+  }
+}
+
+export async function getAllNotifications(shopdomain = 'shop-sieu-vip.myshopify.com') {
+  try {
+    let query = notificationsRef
+      .where('shopifyDomain', '==', shopdomain)
+      .orderBy('timestamp', 'desc');
+    const snapshot = await query.get();
+    if (snapshot.empty) {
+      return [];
+    }
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      timestamp: doc.data().timestamp.toDate()
+    }));
+    return data;
+  } catch (e) {
+    console.log(e);
+    throw e;
   }
 }

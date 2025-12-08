@@ -125,7 +125,7 @@ const proxyConfig = {
   '^/apiSa(/|(\\?.*)?$)': proxyOptions,
   '^/scripttag(/|(\\?.*)?$)': proxyOptions,
   '^/webhooks(/|(\\?.*)?$)': proxyOptions,
-  '^/clientApi(/|(\\?.*)?$)': proxyOptions,
+  '^/clientApi(/|(\\?.*)?$)': proxyOptions
 };
 
 /** @type {ServerOptions} */
@@ -152,7 +152,7 @@ export default defineConfig({
   },
   plugins: [
     nodePolyfills(),
-    // eslint-disable-next-line new-cap
+
     EnvironmentPlugin(
       {
         IS_EMBEDDED_APP: true,

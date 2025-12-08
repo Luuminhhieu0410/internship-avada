@@ -12,7 +12,6 @@ const getEnvPath = () => {
     test: '.env.test'
   };
 
-  // Try environment specific file first, fallback to .env
   const envFile = environment ? envMap[environment] : '.env';
   return path.resolve(__dirname, envFile);
 };
@@ -25,10 +24,7 @@ if (result.error) {
   console.warn(`⚠️  No ${envPath} file found. Using existing environment variables.`);
 }
 
-// Required environment variables
 const requiredEnvVars = ['NODE_ENV'];
-
-// Validate required env vars
 requiredEnvVars.forEach(envVar => {
   if (!process.env[envVar]) {
     throw new Error(`${envVar} environment variable is required but not defined.`);
@@ -45,6 +41,7 @@ module.exports = {
   entry: ['./src/index.js'],
   devtool: isProduction ? false : 'eval-source-map',
   experiments: {asyncWebAssembly: true, topLevelAwait: true},
+
   output: {
     path: path.resolve(__dirname, '../../static/scripttag'),
     filename: 'avada-sale-pop.min.js',
@@ -54,12 +51,14 @@ module.exports = {
     crossOriginLoading: 'anonymous',
     scriptType: 'text/javascript'
   },
+
   resolve: {
     alias: {
       react: 'preact/compat',
       'react-dom': 'preact/compat'
     }
   },
+
   module: {
     rules: [
       {
@@ -71,12 +70,19 @@ module.exports = {
               parser: {
                 syntax: 'ecmascript',
                 jsx: true
+              },
+              transform: {
+                react: {
+                  runtime: 'automatic',
+                  importSource: 'preact'
+                }
               }
             }
           }
         },
         type: 'javascript/auto'
       },
+
       {
         test: /\.(sass|scss|css)$/i,
         use: [
@@ -106,22 +112,21 @@ module.exports = {
         ],
         type: 'javascript/auto'
       },
+
       {
         test: /\.svg$/,
         type: 'asset/resource',
-        generator: {
-          filename: '[name].[hash][ext]'
-        }
+        generator: {filename: '[name].[hash][ext]'}
       },
+
       {
         test: /\.(png|jpe?g|gif)$/i,
         type: 'asset/resource',
-        generator: {
-          filename: '[name].[hash][ext]'
-        }
+        generator: {filename: '[name].[hash][ext]'}
       }
     ]
   },
+
   plugins: [
     new rspack.EnvironmentPlugin({
       NODE_ENV: process.env.NODE_ENV,
@@ -132,21 +137,25 @@ module.exports = {
       APP_URL: process.env.APP_URL || '',
       SHOPIFY_CDN_URL: process.env.SHOPIFY_CDN_URL || PUBLIC_PATH
     }),
+
     new rspack.IgnorePlugin({
       checkResource: resource => resource.startsWith('https://cdnapps.avada.io/')
     })
   ],
+
   optimization: {
     moduleIds: 'deterministic',
     chunkIds: 'named',
     minimize: isProduction,
     mangleExports: false,
     runtimeChunk: false,
+
     splitChunks: {
       chunks: 'async',
       minSize: 20000,
       minChunks: 2,
       automaticNameDelimiter: '.',
+
       cacheGroups: {
         preact: {
           test: /[\\/]node_modules[\\/]preact[\\/]/,

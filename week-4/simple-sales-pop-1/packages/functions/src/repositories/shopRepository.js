@@ -1,5 +1,5 @@
-import { Firestore, Timestamp } from '@google-cloud/firestore';
-import { presentDataAndFormatDate } from '@avada/firestore-utils';
+import {Firestore, Timestamp} from '@google-cloud/firestore';
+import {presentDataAndFormatDate} from '@avada/firestore-utils';
 import presentShop from '@functions/presenters/shopPresenter';
 
 const firestore = new Firestore();
@@ -16,21 +16,21 @@ export async function markInitialNotificationSynced(shopId, count = 0) {
     {
       initialNotificationSynced: true,
       initialSyncedAt: Timestamp.now(),
-      ...(count > 0 && { initialNotificationCount: count })
+      ...(count > 0 && {initialNotificationCount: count})
     },
-    { merge: true }
+    {merge: true}
   );
 }
 
 export async function getShopbyShopifyDomain(shopDomain) {
-  const snapshot = await collection.where("shopifyDomain", "==", shopDomain).get();
+  const snapshot = await collection.where('shopifyDomain', '==', shopDomain).get();
   if (snapshot.empty) {
     console.log('No matching documents.');
     return [];
   }
   let data = [];
   snapshot.forEach(doc => {
-    data.push(doc.data())
+    data.push(doc.data());
   });
   return data;
 }

@@ -1,29 +1,43 @@
-import { useState, useCallback } from 'react';
+import {useCallback} from 'react';
 import DesktopPositionInput from '../DesktopPositionInput/DesktopPositionInput';
-import { Checkbox, RangeSlider } from '@shopify/polaris';
+import {Checkbox, RangeSlider} from '@shopify/polaris';
 
-const DisplaySetting = ({ settings, setSettings }) => {
+const DisplaySetting = ({settings, setSettings}) => {
   // console.log("DisplaySetting settings: ", settings);
-  const handleChangeHideTimeAgoCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, hideTimeAgo: newChecked })), []);
-  const handleChangeTrunateProductNameCheckbox = useCallback(newChecked => setSettings(pre => ({ ...pre, truncateProductName: newChecked })), []);
+  const handleChangeHideTimeAgoCheckbox = useCallback(
+    newChecked =>
+      setSettings(pre => ({
+        ...pre,
+        hideTimeAgo: newChecked
+      })),
+    []
+  );
+  const handleChangeTrunateProductNameCheckbox = useCallback(
+    newChecked =>
+      setSettings(pre => ({
+        ...pre,
+        truncateProductName: newChecked
+      })),
+    []
+  );
   const handleChangePosition = useCallback(
-    value => setSettings(pre => ({ ...pre, position: value })),
+    value => setSettings(pre => ({...pre, position: value})),
     []
   );
   const handleChangeDisplayDuration = useCallback(
-    value => setSettings(pre => ({ ...pre, displayDuration: value })),
+    value => setSettings(pre => ({...pre, displayDuration: value})),
     []
   );
   const handleChangeFirstDelay = useCallback(
-    value => setSettings(pre => ({ ...pre, firstDelay: value })),
+    value => setSettings(pre => ({...pre, firstDelay: value})),
     []
   );
   const handleChangePopsInterval = useCallback(
-    value => setSettings(pre => ({ ...pre, popsInterval: value })),
+    value => setSettings(pre => ({...pre, popsInterval: value})),
     []
   );
   const handleChangeMaxPopupsDisplay = useCallback(
-    value => setSettings(pre => ({ ...pre, maxPopsDisplay: value })),
+    value => setSettings(pre => ({...pre, maxPopsDisplay: value})),
     []
   );
   const RangeSlidersList = [
@@ -63,43 +77,53 @@ const DisplaySetting = ({ settings, setSettings }) => {
   ];
   return (
     <div>
-
-      <div style={{ marginBottom: '20px' }}>
-        <span style={{ fontWeight: '500' }}>APPEARANCE</span>
+      <div style={{marginBottom: '20px'}}>
+        <span style={{fontWeight: '500'}}>APPEARANCE</span>
       </div>
-      <div style={{ margin: '10px 0px' }}>
+      <div style={{margin: '10px 0px'}}>
         <DesktopPositionInput
-          label={'Desktop Position : ' + `${settings.position ? settings.position.split("-").map((abc) => abc.charAt(0).toUpperCase() + abc.slice(1)).join(" ") : ""}`}
+          label={
+            'Desktop Position : ' +
+            `${
+              settings.position
+                ? settings.position
+                    .split('-')
+                    .map(abc => abc.charAt(0).toUpperCase() + abc.slice(1))
+                    .join(' ')
+                : ''
+            }`
+          }
           value={settings.position}
           onChange={handleChangePosition}
           helpText={'The display position of the pop on the your website.'}
         />
       </div>
-      <div style={{ margin: '10px 0px' }}>
+      <div style={{margin: '10px 0px'}}>
         <Checkbox
           label="Hide time ago"
           checked={settings.hideTimeAgo}
           onChange={handleChangeHideTimeAgoCheckbox}
         />
       </div>
-      <div style={{ margin: '10px 0px' }}>
+      <div style={{margin: '10px 0px'}}>
         <Checkbox
           label="Truncate content text"
           checked={settings.truncateProductName}
           onChange={handleChangeTrunateProductNameCheckbox}
         />
-        <p style={{ paddingLeft: '25px', color: 'gray' }}>
+        <p style={{paddingLeft: '25px', color: 'gray'}}>
           If your product name is long for one line, it will be truncated to 'Product na...'
         </p>
       </div>
-      <div style={{ marginTop: '20px' }}>
-        <div style={{ fontWeight: '500' }}>TIMMING</div>
-        <div style={{ margin: '5px 0px', display: 'flex', flexWrap: 'wrap' }}>
+      <div style={{marginTop: '20px'}}>
+        <div style={{fontWeight: '500'}}>TIMMING</div>
+        <div style={{margin: '5px 0px', display: 'flex', flexWrap: 'wrap'}}>
           {RangeSlidersList.map(element => (
-            <div style={{ flexBasis: '380px', margin: '10px 10px' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <div style={{ flex: '2' }}>
+            <div style={{flexBasis: '380px', margin: '10px 10px'}}>
+              <div style={{display: 'flex', gap: '10px'}}>
+                <div style={{flex: '2'}}>
                   <RangeSlider
+                    min={1}
                     label={element.label}
                     value={element.value}
                     onChange={element.onChange}
@@ -117,13 +141,13 @@ const DisplaySetting = ({ settings, setSettings }) => {
                     borderRadius: '4px'
                   }}
                 >
-                  <span style={{ fontWeight: '600', marginLeft: '5px', marginRight: '10px' }}>
+                  <span style={{fontWeight: '600', marginLeft: '5px', marginRight: '10px'}}>
                     {element.value}
                   </span>
-                  <span style={{ color: 'gray' }}>{element.unit}</span>
+                  <span style={{color: 'gray'}}>{element.unit}</span>
                 </div>
               </div>
-              <p style={{ color: 'gray' }}>{element.description}</p>
+              <p style={{color: 'gray'}}>{element.description}</p>
             </div>
           ))}
         </div>

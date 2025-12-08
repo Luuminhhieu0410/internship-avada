@@ -1,8 +1,9 @@
 ctx.req.body là của firebase function parse body 
 lỗi đôi khi ở build không thàng công do code lỗi 
 nếu loading ở embed admin app load lâu , có thể do lỗi FE 
-tạo webhoooks order/create bằng graphql để test thì  bỏ field "filter": "type:lookbook"
-sáng 12/4/2025 : viết front-end nối api sync manually
+tạo webhoooks order/create bằng graphql để test thì bỏ field "filter": "type:lookbook"
 làm chức năng thay đổi số lượng phần tử của trang thì khi thay đổi giá trị số lượng mà ở trang nào cũng nhảy về trang 1 cho dễ
 làm chức năng thay đổi giá trị sort của trang thì khi thay đổi giá trị sort ( asc , desc) mà ở trang nào cũng nhảy về trang 1 cho dễ
+làm chức năng xóa phần tử của 1 trang mà ở trang nào thì cũng nhảy về trang 1 cho dễ
 webhook order create trả về data product_id khác khi thanh toán bằng thẻ test (Test Order / Bogus gateway) . muốn test thì tao order trong trang admin
+8/12/2025 : bug :  url api trong source scripttag phải là link local (link local cũng bị CORS nhưng app.use(cors()) là hết ) , nếu là link tunel cloudflare sẽ dính CORS ( không fix được )

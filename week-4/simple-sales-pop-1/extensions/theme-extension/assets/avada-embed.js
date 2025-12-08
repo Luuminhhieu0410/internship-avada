@@ -1,5 +1,5 @@
 (function() {
-  const BASE_URL = 'https://subsequent-largely-lanes-patrol.trycloudflare.com/scripttag';
+  const BASE_URL = 'https://archives-comm-least-satisfy.trycloudflare.com/scripttag';
 
   const scriptElement = document.createElement('script');
   scriptElement.type = 'text/javascript';

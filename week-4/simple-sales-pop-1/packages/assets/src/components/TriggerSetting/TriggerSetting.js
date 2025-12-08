@@ -1,33 +1,40 @@
-import { Select, LegacyStack, Tag, Autocomplete } from '@shopify/polaris';
-import { useState, useCallback, useEffect } from 'react';
+import {Autocomplete, LegacyStack, Select, Tag} from '@shopify/polaris';
+import {useCallback, useEffect, useState} from 'react';
+
 const ALL_OPTIONS = [
-  { value: '/', label: 'Homepage' },
-  { value: '/collections/all', label: 'All Products' },
-  { value: '/collections', label: 'Collections page' },
-  { value: '/products', label: 'All product pages' },
-  { value: '/cart', label: 'Cart page' },
-  { value: '/checkout', label: 'Checkout page' },
-  { value: '/blogs', label: 'Blog index' },
-  { value: '/pages/about-us', label: 'About Us' },
-  { value: '/pages/contact', label: 'Contact' },
-  { value: '/account', label: 'Account pages' },
-  { value: '/search', label: 'Search page' },
+  {value: '/', label: 'Homepage'},
+  {value: '/collections/all', label: 'All Products'},
+  {value: '/collections', label: 'Collections page'},
+  {value: '/products', label: 'All product pages'},
+  {value: '/cart', label: 'Cart page'},
+  {value: '/checkout', label: 'Checkout page'},
+  {value: '/blogs', label: 'Blog index'},
+  {value: '/pages/about-us', label: 'About Us'},
+  {value: '/pages/contact', label: 'Contact'},
+  {value: '/account', label: 'Account pages'},
+  {value: '/search', label: 'Search page'}
 ];
 
 const specificPageOptions = [
-  { label: "Show on ALL pages", value: "all" },
-  { label: "Show ONLY selected pages", value: "include" },
-  { label: "Show on ALL EXCEPT selected pages", value: "exclude" },
+  {label: 'Show on ALL pages', value: 'all'},
+  {label: 'Show ONLY selected pages', value: 'include'},
+  {label: 'Show on ALL EXCEPT selected pages', value: 'exclude'}
 ];
 
-const parseUrls = (str) => (str ? str.split(',').map(s => s.trim()).filter(Boolean) : []);
+const parseUrls = str =>
+  str
+    ? str
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+    : [];
 
-export default function TriggerSetting({ initSettings, settings, setSettings }) {
+export default function TriggerSetting({initSettings, settings, setSettings}) {
   // console.log('+++',settings);
   const getInitialMode = () => {
     if (initSettings.allShow === 'all') return 'all';
-    if (initSettings.includeUrls == "") return 'exclude';
-    if (initSettings.excludeUrls == "") return 'include';
+    if (initSettings.includeUrls == '') return 'exclude';
+    if (initSettings.excludeUrls == '') return 'include';
     return 'all';
   };
 
@@ -40,7 +47,6 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
 
   const [includeOptions, setIncludeOptions] = useState(ALL_OPTIONS);
   const [excludeOptions, setExcludeOptions] = useState(ALL_OPTIONS);
-
 
   useEffect(() => {
     // reset khi ấn discard
@@ -57,26 +63,26 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
         ...prev,
         allShow: 'all',
         includeUrls: '',
-        excludeUrls: '',
+        excludeUrls: ''
       }));
     } else if (mode === 'include') {
       setSettings(prev => ({
         ...prev,
         allShow: 'specific',
         includeUrls: includeSelected.join(','),
-        excludeUrls: '',
+        excludeUrls: ''
       }));
     } else if (mode === 'exclude') {
       setSettings(prev => ({
         ...prev,
         allShow: 'specific',
         includeUrls: '',
-        excludeUrls: excludeSelected.join(','),
+        excludeUrls: excludeSelected.join(',')
       }));
     }
   }, [mode, includeSelected, excludeSelected]);
 
-  const handleSelectChange = useCallback((value) => {
+  const handleSelectChange = useCallback(value => {
     setMode(value);
 
     if (value === 'include') {
@@ -108,8 +114,7 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
     if (value.trim() && (value.startsWith('/') || value.includes('.'))) {
       const customValue = value.trim();
 
-      filtered.push({ value: customValue, label: `${customValue} (custom)` });
-
+      filtered.push({value: customValue, label: `${customValue} (custom)`});
     }
 
     setOptions(filtered);
@@ -134,12 +139,12 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
     }
   }, []);
 
-  const renderTags = (type) => {
+  const renderTags = type => {
     const selected = type === 'include' ? includeSelected : excludeSelected;
 
     return (
       <LegacyStack spacing="extraTight">
-        {selected.map((value) => {
+        {selected.map(value => {
           const option = ALL_OPTIONS.find(o => o.value === value);
           const label = option ? option.value : `${value} (custom)`;
           return (
@@ -162,12 +167,12 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
         allowMultiple
         options={options}
         selected={selected}
-        onSelect={(selected) => onSelectOption(type, selected)}
+        onSelect={selected => onSelectOption(type, selected)}
         textField={
           <Autocomplete.TextField
             label={label}
             value={inputValue}
-            onChange={(v) => updateText(type, v)}
+            onChange={v => updateText(type, v)}
             verticalContent={renderTags(type)}
             placeholder="Search or type custom URL..."
             autoComplete="off"
@@ -179,22 +184,18 @@ export default function TriggerSetting({ initSettings, settings, setSettings }) 
 
   return (
     <div>
-      <div style={{ marginBottom: '16px', fontWeight: '600' }}>PAGES RESTRICTION</div>
+      <div style={{marginBottom: '16px', fontWeight: '600'}}>PAGES RESTRICTION</div>
 
-      <Select
-        options={specificPageOptions}
-        onChange={handleSelectChange}
-        value={mode}
-      />
+      <Select options={specificPageOptions} onChange={handleSelectChange} value={mode} />
 
       {mode === 'include' && (
-        <div style={{ marginTop: '16px' }}>
+        <div style={{marginTop: '16px'}}>
           {renderAutocomplete('include', 'Show only on these pages')}
         </div>
       )}
 
       {mode === 'exclude' && (
-        <div style={{ marginTop: '16px' }}>
+        <div style={{marginTop: '16px'}}>
           {renderAutocomplete('exclude', 'Hide on these pages')}
         </div>
       )}

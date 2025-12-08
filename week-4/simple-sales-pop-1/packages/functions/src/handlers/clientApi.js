@@ -1,9 +1,12 @@
 import App from 'koa';
-import clientApiRoute from '../routes/clientApi'
+import router from '../routes/clientApi';
+import cors from '@koa/cors';
 
+const app = new App();
+// app.proxy = true;
+app.use(cors());
 
-const api = new App();
+app.use(router.routes());
+app.use(router.allowedMethods());
 
-api.use(clientApiRoute.allowedMethods());
-api.use(clientApiRoute.routes());
-export default api;
+export default app;

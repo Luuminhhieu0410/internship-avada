@@ -21,6 +21,3 @@ redirect_urls = [ ]
 url = "https://mortgage-laws-mike-eval.trycloudflare.com/clientApi"
 subpath = "proxy-1"
 prefix = "apps"
-
-[build]
-automatically_update_urls_on_dev = true

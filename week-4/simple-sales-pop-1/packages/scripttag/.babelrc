@@ -1,10 +1,19 @@
 {
-  "presets": ["@babel/preset-env", "@babel/preset-react"],
+  "presets": [
+    "@babel/preset-env",
+    [
+      "@babel/preset-react",
+      {
+        "runtime": "automatic",
+        "importSource": "preact"
+      }
+    ]
+  ],
   "plugins": [
     "inline-react-svg",
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-transform-runtime",
-    ["@babel/transform-async-to-generator"],
+    "@babel/transform-async-to-generator",
     "@babel/plugin-syntax-jsx",
     [
       "babel-plugin-import",
