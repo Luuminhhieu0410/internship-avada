@@ -86,6 +86,7 @@
     isomorphic-fetch "3.0.0"
     jest "30.2.0"
     moment "^2.30.1"
+    papaparse "^5.5.3"
     prop-types "^15.8.1"
     qs-stringify "^1.2.1"
     react "18.2.0"
@@ -186,7 +187,9 @@
   version "0.0.1"
   resolved "file:packages/scripttag"
   dependencies:
+    "@preact/signals" "^2.5.1"
     axios "1.13.2"
+    date-fns "^4.1.0"
     esbuild "0.27.0"
     firebase "12.6.0"
     firebase-tools "14.26.0"
@@ -3035,6 +3038,18 @@
   version "1.0.0-next.29"
   resolved "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.29.tgz"
   integrity sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==
+
+"@preact/signals-core@^1.12.0":
+  version "1.12.1"
+  resolved "https://registry.npmjs.org/@preact/signals-core/-/signals-core-1.12.1.tgz"
+  integrity sha512-BwbTXpj+9QutoZLQvbttRg5x3l5468qaV2kufh+51yha1c53ep5dY4kTuZR35+3pAZxpfQerGJiQqg34ZNZ6uA==
+
+"@preact/signals@^2.5.1":
+  version "2.5.1"
+  resolved "https://registry.npmjs.org/@preact/signals/-/signals-2.5.1.tgz"
+  integrity sha512-VPjk5YFt7i11Fi4UK0tzaEe5xLwfhUxXL3l89ocxQ5aPz7bRo8M5+N73LjBMPklyXKYKz6YsNo4Smp8n6nplng==
+  dependencies:
+    "@preact/signals-core" "^1.12.0"
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -12721,6 +12736,11 @@ pako@~1.0.5:
   resolved "https://registry.npmjs.org/pako/-/pako-1.0.11.tgz"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
+papaparse@^5.5.3:
+  version "5.5.3"
+  resolved "https://registry.npmjs.org/papaparse/-/papaparse-5.5.3.tgz"
+  integrity sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==
+
 parent-module@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npmjs.org/parent-module/-/parent-module-1.0.1.tgz"
@@ -14227,6 +14247,10 @@ safe-stable-stringify@^2.3.1:
   version "2.1.2"
   resolved "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
+
+sass-embedded-all-unknown@1.93.3:
+  resolved "https://registry.npmjs.org/sass-embedded-all-unknown/-/sass-embedded-all-unknown-1.93.3.tgz"
+  integrity sha512-3okGgnE41eg+CPLtAPletu6nQ4N0ij7AeW+Sl5Km4j29XcmqZQeFwYjHe1AlKTEgLi/UAONk1O8i8/lupeKMbw==
 
 sass-embedded-win32-x64@1.93.3:
   version "1.93.3"

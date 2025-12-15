@@ -1,7 +1,7 @@
 import * as notificationRepository from '../repositories/notificationRepository';
+import {createNotifications, deleteAllNotifications} from '../repositories/notificationRepository';
 import {getCurrentShopData} from '../helpers/auth';
 import {firstSyncNotifications} from '@functions/handlers/shopify/afterLogin';
-import {deleteAllNotifications} from '../repositories/notificationRepository';
 
 export async function paginationNotification(ctx) {
   try {
@@ -33,9 +33,7 @@ export async function paginationNotification(ctx) {
 export async function deleteNotifications(ctx) {
   try {
     const {listNotificationId} = ctx.req.body;
-    // console.log("xxxxx", listNotificationId);
-    const shopData = getCurrentShopData(ctx);
-    await notificationRepository.deleteNotifications(shopData.id, listNotificationId);
+    await notificationRepository.deleteNotifications(listNotificationId);
     ctx.body = {
       data: listNotificationId,
       success: true,
@@ -54,8 +52,7 @@ export async function deleteNotifications(ctx) {
 export async function syncManuallyNotifications(ctx) {
   try {
     const shopData = getCurrentShopData(ctx);
-    await deleteAllNotifications(shopData.id);
-    await firstSyncNotifications(shopData);
+    await Promise.all([deleteAllNotifications(shopData.domain), firstSyncNotifications(shopData)]);
     ctx.body = {
       success: true,
       message: 'Notifications successfully updated successfully'
@@ -67,5 +64,40 @@ export async function syncManuallyNotifications(ctx) {
       success: false,
       message: error.message || 'Internal Server Error'
     };
+  }
+}
+
+export async function importNotificationsFromCsv(ctx) {
+  try {
+    const shopData = getCurrentShopData(ctx);
+    const {notifications, replace = false} = ctx.req.body;
+    const convertNotifications = notifications.map(n => {
+      console.log('!!!!', n.date);
+      return {
+        ...n,
+        shopId: shopData.id,
+        shopifyDomain: shopData.shopifyDomain,
+        timestamp: new Date(n.date)
+      };
+    });
+
+    if (replace) {
+      await deleteAllNotifications(shopData.shopifyDomain);
+    }
+
+    await createNotifications(convertNotifications);
+
+    ctx.status = 200;
+    ctx.body = {
+      success: true,
+      message: replace
+        ? 'Notifications replaced successfully'
+        : 'Notifications imported successfully',
+      count: convertNotifications.length
+    };
+  } catch (error) {
+    console.log('importNotificationsFromCsv Error', error);
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
 }

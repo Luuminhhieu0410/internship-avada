@@ -6,6 +6,7 @@ import * as appNewsController from '@functions/controllers/appNewsController';
 import * as settingsController from '../controllers/settingsController';
 import * as notifcationController from '../controllers/notificationController';
 import {getApiPrefix} from '@functions/const/app';
+import {getStatusAppThemeExtension} from '@functions/controllers/themeController';
 
 export default function apiRouter(isEmbed = false) {
   const router = new Router({prefix: getApiPrefix(isEmbed)});
@@ -25,5 +26,7 @@ export default function apiRouter(isEmbed = false) {
   router.get('/notifications', notifcationController.paginationNotification);
   router.delete('/notifications', notifcationController.deleteNotifications);
   router.put('/notifications', notifcationController.syncManuallyNotifications);
+  router.put('/notifications/import', notifcationController.importNotificationsFromCsv);
+  router.get('/theme/status', getStatusAppThemeExtension);
   return router;
 }

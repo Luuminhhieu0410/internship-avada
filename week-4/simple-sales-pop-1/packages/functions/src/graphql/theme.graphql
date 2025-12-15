@@ -1,0 +1,21 @@
+query GetDataFileThemes {
+  themes(first: 1) {
+    edges {
+      node {
+        files(filenames: ["config/settings_data.json"]) {
+          edges {
+            node {
+
+              body {
+
+                ... on OnlineStoreThemeFileBodyText {
+                  content
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

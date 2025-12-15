@@ -16,7 +16,7 @@
     "@avada/core": "4.6.0",
     "@avada/firestore-utils": "0.0.3",
     "@avada/utils": "^1.0.0",
-    "@google-cloud/firestore": "^8.0.0",
+    "@google-cloud/firestore":     "^8.0.0",
     "@google-cloud/pubsub": "^5.2.0",
     "@koa/cors": "^5.0.0",
     "axios": "1.13.2",

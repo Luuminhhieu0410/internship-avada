@@ -1,5 +1,5 @@
 import {getCurrentShopData} from '../../helpers/auth';
-import {getOrderByAdminApi} from '../../services/orderService';
+
 import {createNotifications} from '../../repositories/notificationRepository';
 import {
   getShopbyShopifyDomain,
@@ -7,7 +7,7 @@ import {
 } from '../../repositories/shopRepository';
 import {addSettingForShop} from '../../repositories/settingsRepository';
 import {DEFFAULT_SETTINGS} from '../../const/setting';
-import {registerWebhook} from '../../services/webhookService';
+import {getOrderByAdminApi, registerWebhook} from '@functions/services/shopifyService';
 
 export async function afterLoginHandler(ctx) {
   const shopData = getCurrentShopData(ctx);

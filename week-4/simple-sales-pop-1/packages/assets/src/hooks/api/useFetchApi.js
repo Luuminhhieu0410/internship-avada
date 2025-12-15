@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { api } from '@assets/helpers';
+import {useEffect, useState} from 'react';
+import {api} from '@assets/helpers';
 import stringify from 'qs-stringify';
-import { handleError } from '@assets/services/errorService';
+import {handleError} from '@assets/services/errorService';
 
 /**
  * useFetchApi hook for fetch data from api with url
@@ -41,15 +41,14 @@ export default function useFetchApi({
       if (resp.hasOwnProperty('data')) {
         let newData = presentData ? presentData(resp.data) : resp.data;
         if (!Array.isArray(newData)) {
-          newData = { ...defaultData, ...newData };
-
+          newData = {...defaultData, ...newData};
         }
         // console.log("Merged newData: ", newData);
         setData(prev => {
           if (!keepPreviousData) {
             return newData;
           }
-          return Array.isArray(newData) ? [...prev, ...newData] : { ...prev, ...newData };
+          return Array.isArray(newData) ? [...prev, ...newData] : {...prev, ...newData};
         });
       }
     } catch (e) {
@@ -62,7 +61,7 @@ export default function useFetchApi({
 
   useEffect(() => {
     if (initLoad && !fetched) {
-      fetchApi(url, initQueries).then(() => { });
+      fetchApi(url, initQueries).then(() => {});
     }
   }, []);
 

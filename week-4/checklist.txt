@@ -7,3 +7,7 @@ làm chức năng thay đổi giá trị sort của trang thì khi thay đổi g
 làm chức năng xóa phần tử của 1 trang mà ở trang nào thì cũng nhảy về trang 1 cho dễ
 webhook order create trả về data product_id khác khi thanh toán bằng thẻ test (Test Order / Bogus gateway) . muốn test thì tao order trong trang admin
 8/12/2025 : bug :  url api trong source scripttag phải là link local (link local cũng bị CORS nhưng app.use(cors()) là hết ) , nếu là link tunel cloudflare sẽ dính CORS ( không fix được )
+10/12/2025 : cần fix Notifications.js ( source frontend) , push 2 file csv vào nhưng chỉ hiện data 1 file khi push lên backend (đã fix)
+14/12/2025 : bug Notifications.js ( source frontend) , khi click xóa file hợp lệ mà convert thành công sang notification
+ở DataTable nhưng ở state chứa toàn bộ notifi của tất cả các file không xóa dữ liệu của file đã thêm đó
+( mới chỉ xóa trong state hiển thị trong DataTable) => mặc dù xóa trên giao diện đã ẩn đi nhưng khi push lên backend thì vẫn nguyên

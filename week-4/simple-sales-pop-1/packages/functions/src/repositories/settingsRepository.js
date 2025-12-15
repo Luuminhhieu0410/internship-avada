@@ -3,30 +3,52 @@ import {Firestore} from '@google-cloud/firestore';
 const firestore = new Firestore();
 const settingsRef = firestore.collection('settings');
 
+/**
+ *
+ * @param shopId
+ * @returns {Promise<FirebaseFirestore.DocumentData|null>}
+ */
 export async function getSettingsByShopId(shopId) {
-  const doc = await settingsRef.doc(shopId).get();
+  try {
+    const doc = await settingsRef.doc(shopId).get();
 
-  if (!doc.exists) {
-    return null;
+    if (!doc.exists) {
+      return null;
+    }
+
+    return doc.data();
+  } catch (e) {
+    console.log(e);
+    throw e;
   }
-
-  return doc.data();
 }
 
+/**
+ *
+ * @param shopId
+ * @param settings
+ * @returns {Promise<*>}
+ */
 export async function addSettingForShop(shopId, settings) {
   try {
     await settingsRef.doc(shopId).set(settings);
     return settings;
-  } catch (error) {
-    throw new Error('Error adding settings: ' + error.message);
+  } catch (e) {
+    throw e;
   }
 }
 
+/**
+ *
+ * @param shopId
+ * @param settings
+ * @returns {Promise<*>}
+ */
 export async function updateSettingsByShopId(shopId, settings) {
   try {
     await settingsRef.doc(shopId).set(settings, {merge: true});
     return settings;
-  } catch (error) {
-    throw new Error('Error upserting settings: ' + error.message);
+  } catch (e) {
+    throw e;
   }
 }

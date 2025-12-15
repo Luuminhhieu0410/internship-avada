@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 
-const {shopify} = functions.config();
+const {shopify} = functions.config(); // doc file .runtimeconfig.json
 
 export default {
   secret: shopify.secret,

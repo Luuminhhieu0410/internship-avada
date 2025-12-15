@@ -4,8 +4,15 @@ const firestore = new Firestore();
 
 const notificationsRef = firestore.collection('notifications');
 
+/**
+ *
+ * @param notifications
+ * @returns {Promise<void>}
+ */
 export async function createNotifications(notifications) {
   try {
+    console.log('<><>', notifications);
+
     const batch = firestore.batch();
     notifications.forEach(notification => {
       const docRef = notificationsRef.doc();
@@ -19,6 +26,11 @@ export async function createNotifications(notifications) {
   }
 }
 
+/**
+ *
+ * @param notification
+ * @returns {Promise<{readonly id: string, readonly firestore: FirebaseFirestore.Firestore, readonly parent: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData, FirebaseFirestore.DocumentData>, readonly path: string, collection(collectionPath: string): FirebaseFirestore.CollectionReference, listCollections(): Promise<Array<FirebaseFirestore.CollectionReference>>, create(data: FirebaseFirestore.WithFieldValue<FirebaseFirestore.DocumentData>): Promise<FirebaseFirestore.WriteResult>, set: {(data: FirebaseFirestore.PartialWithFieldValue<FirebaseFirestore.DocumentData>, options: FirebaseFirestore.SetOptions): Promise<FirebaseFirestore.WriteResult>, (data: FirebaseFirestore.WithFieldValue<FirebaseFirestore.DocumentData>): Promise<FirebaseFirestore.WriteResult>}, update: {(data: FirebaseFirestore.UpdateData<FirebaseFirestore.DocumentData>, precondition?: FirebaseFirestore.Precondition): Promise<FirebaseFirestore.WriteResult>, (field: (string | FirebaseFirestore.FieldPath), value: any, ...moreFieldsOrPrecondition: any[]): Promise<FirebaseFirestore.WriteResult>}, delete(precondition?: FirebaseFirestore.Precondition): Promise<FirebaseFirestore.WriteResult>, get(): Promise<FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData, FirebaseFirestore.DocumentData>>, onSnapshot(onNext: (snapshot: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData, FirebaseFirestore.DocumentData>) => void, onError?: (error: Error) => void): () => void, isEqual(other: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData, FirebaseFirestore.DocumentData>): boolean, withConverter: {<NewAppModelType, NewDbModelType=FirebaseFirestore.DocumentData extends FirebaseFirestore.DocumentData>(converter: FirebaseFirestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>): FirebaseFirestore.DocumentReference<NewAppModelType, NewDbModelType>, (converter: null): FirebaseFirestore.DocumentReference}}>}
+ */
 export async function createNotification(notification) {
   try {
     const doc = await notificationsRef.add(notification);
@@ -32,6 +44,15 @@ export async function createNotification(notification) {
   }
 }
 
+/**
+ *
+ * @param limit
+ * @param shopId
+ * @param startCursor
+ * @param endCursor
+ * @param sortBy
+ * @returns {Promise<{data: (*&{id: *, timestamp: *})[], pageInfo: {startCursor: (string|null), endCursor: (string|null), pageSize: number, totalNotifications: *, totalPages: number, hasNextPage: boolean, hasPrevPage: boolean}}>}
+ */
 export async function getNotification({
   limit = 3,
   shopId = 'cSikvwvknY1zHD9dotEE',
@@ -120,7 +141,12 @@ export async function getNotification({
   }
 }
 
-export async function deleteNotifications(shopId, notificationIds) {
+/**
+ *
+ * @param notificationIds
+ * @returns {Promise<void>}
+ */
+export async function deleteNotifications(notificationIds) {
   try {
     const batch = firestore.batch();
     notificationIds.forEach(notificationId => {
@@ -135,9 +161,14 @@ export async function deleteNotifications(shopId, notificationIds) {
   }
 }
 
-export async function deleteAllNotifications(shopId) {
+/**
+ *
+ * @param shopDomain
+ * @returns {Promise<void>}
+ */
+export async function deleteAllNotifications(shopDomain) {
   try {
-    const snapshot = await notificationsRef.where('shopId', '==', shopId).get();
+    const snapshot = await notificationsRef.where('shopifyDomain', '==', shopDomain).get();
 
     if (snapshot.empty) {
       return;
@@ -168,6 +199,11 @@ export async function deleteAllNotifications(shopId) {
   }
 }
 
+/**
+ *
+ * @param shopdomain
+ * @returns {Promise<(*&{id: *, timestamp: *})[]|*[]>}
+ */
 export async function getAllNotifications(shopdomain = 'shop-sieu-vip.myshopify.com') {
   try {
     let query = notificationsRef

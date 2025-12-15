@@ -10,6 +10,12 @@ export async function getShopById(id) {
   return presentDataAndFormatDate(doc, presentShop);
 }
 
+/**
+ *
+ * @param shopId
+ * @param count
+ * @returns {Promise<void>}
+ */
 export async function markInitialNotificationSynced(shopId, count = 0) {
   const shopRef = collection.doc(shopId);
   await shopRef.set(
@@ -22,6 +28,11 @@ export async function markInitialNotificationSynced(shopId, count = 0) {
   );
 }
 
+/**
+ *
+ * @param shopDomain
+ * @returns {Promise<*[]>}
+ */
 export async function getShopbyShopifyDomain(shopDomain) {
   const snapshot = await collection.where('shopifyDomain', '==', shopDomain).get();
   if (snapshot.empty) {

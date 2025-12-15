@@ -4,19 +4,29 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
+  DataTable,
+  DropZone,
+  EmptyState,
+  Icon,
+  LegacyCard,
   LegacyStack,
+  Link,
   Modal,
   ResourceItem,
   ResourceList,
   Select,
+  SkeletonBodyText,
   Text,
   TextContainer
 } from '@shopify/polaris';
+import {ArrowDownIcon} from '@shopify/polaris-icons';
 import NotificationPopup from '../../components/NotificationPopup/NotificationPopup';
 import useFetchApi from '../../hooks/api/useFetchApi';
 import moment from 'moment';
 import useDeleteApi from '../../hooks/api/useDeleteApi';
 import useEditApi from '@assets/hooks/api/useEditApi';
+import {csvDataFileToObject, validateCSVHeaders} from '@assets/utils/Papaparse';
 
 const Notifications = () => {
   const [selectedItems, setSelectedItems] = useState([]);
@@ -26,7 +36,13 @@ const Notifications = () => {
   const [endCursor, setEndCursor] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isActiveModalDeleleNotification, setIsActiveModalDeleteNotification] = useState(false);
-
+  const [isActiveModalImportFile, setIsActiveModalImportFile] = useState(false);
+  const [checkBoxReplaceValue, setCheckBoxReplaceValue] = useState(false);
+  const [uploadedCsvFiles, setUploadedCsvFiles] = useState([]);
+  const [rejectedCsvFiles, setRejectedCsvFiles] = useState([]);
+  const [errorMessageCsvUploaded, setErrorMessageCsvUploaded] = useState('');
+  const [loadingUploaded, setLoadingUploaded] = useState(false);
+  const [notificationsFromAllFiles, setNotificationsFromAllFiles] = useState([]);
   const {
     data: notifications, // Array<Notification>
     fetchApi,
@@ -39,6 +55,7 @@ const Notifications = () => {
     initLoad: true,
     initQueries: {limit: pageSize, sortBy: sortValue}
   });
+
   const successCallback = data => {
     console.log('>>>>', data);
     setNotifications(pre => pre.filter(notification => !data.data.includes(notification.id)));
@@ -49,7 +66,10 @@ const Notifications = () => {
     successCallback: successCallback
   });
   const {editing, handleEdit} = useEditApi({url: '/notifications', fullResp: true});
-
+  const {editing: loadingSendDataFile, handleEdit: sendRequestDataFile} = useEditApi({
+    url: '/notifications/import',
+    fullResp: true
+  });
   const optionsSelectPageSize = [
     // {label: '1', value: 1}, // nếu để giá trị 1 thì endCursor và startCursor không hoạt động
     {label: '2', value: 2},
@@ -92,6 +112,12 @@ const Notifications = () => {
     setCurrentPage(1);
     fetchApi(null, {limit: pageSize, sortBy: sortValue});
   }, [pageSize]);
+  useEffect(() => {
+    if (rejectedCsvFiles.length != 0) {
+      // console.log('error ', rejectedCsvFiles);
+      setErrorMessageCsvUploaded(`${rejectedCsvFiles[0].name} is not valid`);
+    }
+  }, [rejectedCsvFiles]);
   const handleNextPage = async () => {
     if (!pageInfo.hasNextPage) return;
     await fetchApi(null, {limit: pageSize, endCursor, sortBy: sortValue});
@@ -110,6 +136,7 @@ const Notifications = () => {
 
   const handleDeleteInModal = async () => {
     setIsActiveModalDeleteNotification(false);
+    setSelectedItems([]);
     await handleDelete({data: {listNotificationId: selectedItems}});
     await fetchApi(null, {limit: pageSize, endCursor, sortBy: sortValue});
   };
@@ -130,13 +157,102 @@ const Notifications = () => {
       onAction: () => setIsActiveModalDeleteNotification(true)
     }
   ];
-  const toggleModal = useCallback(() => setIsActiveModalDeleteNotification(active => !active), []);
-  const cancelHandle = useCallback(() => setIsActiveModalDeleteNotification(false), []);
+  const toggleDeleteNotificationModal = useCallback(
+    () => setIsActiveModalDeleteNotification(active => !active),
+    []
+  );
+  const closeDeleteNotificationModal = useCallback(
+    () => setIsActiveModalDeleteNotification(false),
+    []
+  );
+  const toggleImportFileModal = useCallback(() => {
+    setIsActiveModalImportFile(active => !active);
+  }, []);
+
+  const onClickDeleteFile = index => {
+    console.log('onClick', index);
+    setUploadedCsvFiles(files => files.filter((_, i) => i !== index));
+  };
+
+  const closeImportFileModal = useCallback(() => setIsActiveModalImportFile(false), []);
+
+  const handleDropZoneDrop = useCallback(async (_dropFiles, acceptedFiles, _rejectedFiles) => {
+    setLoadingUploaded(true);
+    let convertFiles = [];
+    const allNotificationsInFiles = [];
+    for (let i = 0; i < acceptedFiles.length; i++) {
+      const ArrayObjectCsv = await csvDataFileToObject(acceptedFiles[i]);
+      const checkValidFormat = validateCSVHeaders(
+        ['firstName', 'productName', 'slug', 'productImage', 'date', 'city', 'country'],
+        ArrayObjectCsv
+      );
+
+      convertFiles.push({
+        // dung de hien thi cho rows table
+        file: acceptedFiles[i],
+        time: new Date(Date.now()),
+        notifi: checkValidFormat ? ArrayObjectCsv : []
+      });
+      if (checkValidFormat) {
+        console.log('>>>', ArrayObjectCsv);
+        allNotificationsInFiles.push(ArrayObjectCsv);
+      }
+    }
+    // allNotificationsInFiles đang la array 2 chieu
+    setNotificationsFromAllFiles(old => [...old, allNotificationsInFiles]); // array 3 chieu
+    setUploadedCsvFiles(files => [...files, ...convertFiles]);
+    setRejectedCsvFiles(_rejectedFiles);
+    setLoadingUploaded(false);
+  }, []);
+
+  // const customValidator = useCallback(file => {
+  //   const under25MB = file.size < 25 * 1024 * 1024;
+  //
+  //   return under25MB;
+  // }, []);
+  const handleSendImportData = async () => {
+    // console.log('origin ', notificationsFromAllFiles);
+    // console.log('origin -> flat() ', notificationsFromAllFiles.flat().flat());
+    await sendRequestDataFile({
+      notifications: notificationsFromAllFiles.flat().flat(),
+      replace: checkBoxReplaceValue
+    });
+    await fetchApi(null, {limit: pageSize, endCursor, sortBy: sortValue});
+    setIsActiveModalImportFile(false);
+    setUploadedCsvFiles([]);
+  };
+  const rowsListFile = useMemo(() => {
+    if (uploadedCsvFiles.length != 0) {
+      return uploadedCsvFiles.map((data, index) => {
+        // console.log('uploadedCsvFile', file);
+        return [
+          data.file.name,
+          data.notifi.length != 0 ? (
+            `${data.notifi.length}  notifications`
+          ) : (
+            <span style={{color: 'red'}}>Error</span>
+          ),
+          data.time.toLocaleString(),
+          <Button onClick={() => onClickDeleteFile(index)}>x</Button>
+        ];
+      });
+    }
+  }, [uploadedCsvFiles]);
+  const emptyState = (
+    <LegacyCard sectioned>
+      <EmptyState
+        heading="No notifications found"
+        image="https://cdn.shopify.com/s/files/1/2376/3301/products/emptystate-files.png"
+      >
+        <p>Try changing the filters or search term</p>
+      </EmptyState>
+    </LegacyCard>
+  );
   return (
     <div style={{margin: 'auto', maxWidth: '950px', padding: '20px 0'}}>
       <Modal
         open={isActiveModalDeleleNotification}
-        onClose={toggleModal}
+        onClose={toggleDeleteNotificationModal}
         title="Remove selected notification(s)?"
         primaryAction={{
           destructive: true,
@@ -146,7 +262,7 @@ const Notifications = () => {
         secondaryActions={[
           {
             content: 'Cancel',
-            onAction: cancelHandle
+            onAction: closeDeleteNotificationModal
           }
         ]}
       >
@@ -160,11 +276,71 @@ const Notifications = () => {
           </LegacyStack>
         </Modal.Section>
       </Modal>
+      <Modal
+        open={isActiveModalImportFile}
+        onClose={toggleImportFileModal}
+        title="Import Notifcations by CSV"
+        primaryAction={{
+          loading: loadingSendDataFile,
+          disabled: loadingSendDataFile || uploadedCsvFiles?.length == 0,
+          content: 'Import',
+          onAction: handleSendImportData
+        }}
+        secondaryActions={[
+          {
+            content: 'Cancel',
+            onAction: closeImportFileModal
+          }
+        ]}
+      >
+        <Modal.Section>
+          <LegacyStack vertical>
+            {!!errorMessageCsvUploaded && (
+              <div style={{color: 'red'}}>{errorMessageCsvUploaded}</div>
+            )}
+            <DropZone
+              disabled={loadingUploaded}
+              accept=".csv"
+              allowMultiple={true}
+              errorOverlayText="File type must be .csv"
+              type="file"
+              onDrop={handleDropZoneDrop}
+              // customValidator={customValidator}
+            >
+              <DropZone.FileUpload actionHint={'Accepts .csv (maximum size is 25MB)'} />
+            </DropZone>
+            <Link external={true} url="http://localhost:5000/test/Sales_Pop_sample.csv">
+              Download example csv file
+            </Link>
+            <Checkbox
+              checked={checkBoxReplaceValue}
+              label="Replace the entire list with the CSV content"
+              onChange={() => {
+                setCheckBoxReplaceValue(active => !active);
+              }}
+            />
+
+            {loadingUploaded ? (
+              <SkeletonBodyText />
+            ) : uploadedCsvFiles.length > 0 ? (
+              <DataTable
+                columnContentTypes={['text', 'text', 'text', 'text']}
+                headings={['Name', 'Notifications', 'Date', '']}
+                rows={rowsListFile}
+              />
+            ) : null}
+          </LegacyStack>
+        </Modal.Section>
+      </Modal>
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         <Text variant="headingLg" as="h5">
           Notification: New sales pops
         </Text>
-        <Button plain>Import</Button>
+        <Button plain onClick={() => toggleImportFileModal()}>
+          <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+            <Icon source={ArrowDownIcon} tone="base" /> Import
+          </div>
+        </Button>
       </div>
 
       <Text variant="bodyMd" color="subdued">
@@ -194,7 +370,7 @@ const Notifications = () => {
       <div style={{display: 'flex', justifyContent: 'flex-end'}}>
         <div style={{maxWidth: '150px'}}>
           <Select
-            disabled={loading || deleting || editing}
+            disabled={loading || deleting || editing || notifications.length <= 0}
             label="Notifications per page "
             options={optionsSelectPageSize}
             onChange={handleSelectChangePageSize}
@@ -207,6 +383,7 @@ const Notifications = () => {
       <Box>
         <Card padding="0">
           <ResourceList
+            emptyState={emptyState}
             loading={loading || deleting || editing}
             resourceName={resourceName}
             items={notifications}
@@ -220,13 +397,15 @@ const Notifications = () => {
             promotedBulkActions={promotedBulkActions}
             selectedItems={selectedItems}
             onSelectionChange={setSelectedItems}
-            pagination={{
-              label: <span>{`Pages ${currentPage}/${pageInfo.totalPages || ''}`}</span>,
-              hasNext: pageInfo.hasNextPage,
-              hasPrevious: pageInfo.hasPrevPage,
-              onNext: handleNextPage,
-              onPrevious: handlePrevPage
-            }}
+            {...(notifications.length > 0 && {
+              pagination: {
+                label: <span>{`Pages ${currentPage}/${pageInfo.totalPages || ''}`}</span>,
+                hasNext: pageInfo.hasNextPage,
+                hasPrevious: pageInfo.hasPrevPage,
+                onNext: handleNextPage,
+                onPrevious: handlePrevPage
+              }
+            })}
             renderItem={item => {
               const m = moment(item.timestamp);
               return (
@@ -243,7 +422,8 @@ const Notifications = () => {
               );
             }}
           />
-          {!loading && (
+
+          {!loading && notifications.length > 0 && (
             <div style={{textAlign: 'center'}}>
               <Text variant="headingSm" as="h6" color="subdued">
                 Showing {startRecord}-{endRecord} of a total of {pageInfo.totalNotifications}{' '}

@@ -1,4 +1,4 @@
-import { formatDateFields } from '@avada/firestore-utils';
+import {formatDateFields} from '@avada/firestore-utils';
 
 /**
  * Get current shop id from Koa context
@@ -8,7 +8,7 @@ import { formatDateFields } from '@avada/firestore-utils';
  * @return {string}
  */
 export function getCurrentShop(ctx) {
-  console.log(">>>> shop ID in auth.js: ", ctx.state.user.shopID);
+  console.log('>>>> shop ID in auth.js: ', ctx.state.user.shopID);
   return ctx.state.user.shopID;
 }
 
@@ -19,7 +19,7 @@ export function getCurrentShop(ctx) {
  * @returns {*}
  */
 export function getCurrentUserInstance(ctx) {
-  console.log(">>>> user instance in auth.js: ", ctx.state.user);
+  console.log('>>>> user instance in auth.js: ', ctx.state.user);
   return ctx.state.user;
 }
 
@@ -31,7 +31,7 @@ export function getCurrentUserInstance(ctx) {
  */
 export function getCurrentShopData(ctx) {
   const shopData = ctx.state.user.shopData;
-  console.log(">>>> shop data in auth.js: ", shopData);
+  console.log('>>>> shop data in auth.js: ', shopData);
   if (!shopData) return null;
 
   return formatDateFields(ctx.state.user.shopData);
@@ -44,6 +44,6 @@ export function getCurrentShopData(ctx) {
  * @returns {*}
  */
 export function getCurrentSession(ctx) {
-  console.log(">>>> shopify session in auth.js: ", ctx.state.shopifySession);
+  console.log('>>>> shopify session in auth.js: ', ctx.state.shopifySession);
   return ctx.state.shopifySession;
 }
