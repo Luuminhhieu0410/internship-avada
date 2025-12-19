@@ -11,3 +11,6 @@ webhook order create trả về data product_id khác khi thanh toán bằng th�
 14/12/2025 : bug Notifications.js ( source frontend) , khi click xóa file hợp lệ mà convert thành công sang notification
 ở DataTable nhưng ở state chứa toàn bộ notifi của tất cả các file không xóa dữ liệu của file đã thêm đó
 ( mới chỉ xóa trong state hiển thị trong DataTable) => mặc dù xóa trên giao diện đã ẩn đi nhưng khi push lên backend thì vẫn nguyên
+(đã fix bằng cách dùng chung 1 state cho cả 2 )
+15/12/2025 : ở store front cái popup có làm được chỉ khi click vào foating button thì mới load component hiển thị popup (lazy load)
+16/12/2025 : cần sửa liquid theme embed extention thay vi load file scripttag ở mọi trang thì chỉ load ở trang nào chỉ định theo setting , làm lazy load cho displaymanager

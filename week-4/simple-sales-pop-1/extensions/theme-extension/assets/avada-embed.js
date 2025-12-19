@@ -1,5 +1,5 @@
 (function() {
-  const BASE_URL = 'https://math-descriptions-duties-signatures.trycloudflare.com/scripttag';
+  const BASE_URL = 'https://chrome-consequences-partly-foreign.trycloudflare.com/scripttag';
 
   const scriptElement = document.createElement('script');
   scriptElement.type = 'text/javascript';

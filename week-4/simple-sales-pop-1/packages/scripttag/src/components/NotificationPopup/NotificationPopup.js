@@ -20,7 +20,7 @@ const NotificationPopup = ({
     <div className={`Avava-SP__Wrapper animated ${className}`} style={{...position, ...style}}>
       <div className="Avava-SP__Inner">
         <div className="Avava-SP__Container">
-          <a href={`/products/${slug}`} className={'Avava-SP__LinkWrapper'}>
+          <a href={`/products/${slug}?redirectFrom=salepop`} className={'Avava-SP__LinkWrapper'}>
             <div
               className="Avava-SP__Image"
               style={{

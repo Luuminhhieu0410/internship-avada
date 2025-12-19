@@ -9,6 +9,8 @@ import '@shopify/polaris/build/esm/styles.css';
 
 (async () => {
   const {shop, shopInfo} = await api('/shops');
+  console.log('shopInfo', shopInfo);
+  console.log('shop', shopInfo);
   const [activeShop, user] = [
     collectActiveShopData({shop, shopInfo}),
     {email: shop.email, displayName: shopInfo.shopOwner}

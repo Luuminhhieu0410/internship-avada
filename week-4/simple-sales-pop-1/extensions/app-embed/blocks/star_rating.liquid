@@ -1,7 +1,18 @@
+<script>
+  window.avada_settings = {{ block.settings.default_open_mode }}
+</script>
 {% schema %}
 {
   "name": "Avada snippet",
   "target": "body",
-  "javascript": "avada-embed.js"
+  "javascript": "avada-embed.js",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "default_open_mode",
+      "label": "default open mode",
+      "default": true
+    }
+  ]
 }
 {% endschema %}

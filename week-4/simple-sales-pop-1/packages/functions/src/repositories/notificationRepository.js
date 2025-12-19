@@ -206,9 +206,7 @@ export async function deleteAllNotifications(shopDomain) {
  */
 export async function getAllNotifications(shopdomain = 'shop-sieu-vip.myshopify.com') {
   try {
-    let query = notificationsRef
-      .where('shopifyDomain', '==', shopdomain)
-      .orderBy('timestamp', 'desc');
+    let query = notificationsRef.where('shopId', '==', shopdomain).orderBy('timestamp', 'desc');
     const snapshot = await query.get();
     if (snapshot.empty) {
       return [];
@@ -218,6 +216,7 @@ export async function getAllNotifications(shopdomain = 'shop-sieu-vip.myshopify.
       ...doc.data(),
       timestamp: doc.data().timestamp.toDate()
     }));
+    console.log('this is repository notificaiton', data);
     return data;
   } catch (e) {
     console.log(e);

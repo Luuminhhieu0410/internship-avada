@@ -1,5 +1,6 @@
 import {prepareShopData} from '@avada/core';
 import Shopify from 'shopify-api-node';
+import shopifyConfig from '../config/shopify';
 import appConfig from '../config/app';
 import {loadGraphQL} from '@functions/helpers/graphql/graphqlHelpers';
 
@@ -13,8 +14,8 @@ export const API_VERSION = '2024-04';
  * @return {Shopify}
  */
 export function initShopify(shopData, apiVersion = API_VERSION) {
-  // const shopParsedData = prepareShopData(shopData.id, shopData, shopifyConfig.accessTokenKey);
-  const shopParsedData = prepareShopData(shopData.id, shopData); // dong tren la goc , dong nay test xem chay k
+  const shopParsedData = prepareShopData(shopData.id, shopData, shopifyConfig.accessTokenKey);
+  // const shopParsedData = prepareShopData(shopData.id, shopData); // dong tren la goc , dong nay test xem chay k (da thu va loi Missing or invalid options)
   const {shopifyDomain, accessToken} = shopParsedData;
 
   return new Shopify({

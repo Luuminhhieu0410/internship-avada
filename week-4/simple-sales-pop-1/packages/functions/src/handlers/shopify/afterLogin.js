@@ -8,6 +8,7 @@ import {
 import {addSettingForShop} from '../../repositories/settingsRepository';
 import {DEFFAULT_SETTINGS} from '../../const/setting';
 import {getOrderByAdminApi, registerWebhook} from '@functions/services/shopifyService';
+import {convertOrderDataToNotifications} from '@functions/utils/utils';
 
 export async function afterLoginHandler(ctx) {
   const shopData = getCurrentShopData(ctx);
@@ -18,7 +19,7 @@ export async function afterLoginHandler(ctx) {
       return;
     }
     const [notifications] = await Promise.all([
-      firstSyncNotifications(shopData),
+      syncFirstNotifications(shopData),
       addDefaultSettings(shopData.id),
       registerWebhook(shopData),
       // registerScripttag(shopData),
@@ -31,25 +32,10 @@ export async function afterLoginHandler(ctx) {
   }
 }
 
-export async function firstSyncNotifications(shopData) {
+export async function syncFirstNotifications(shopData) {
   try {
     const orderData = await getOrderByAdminApi(shopData);
-    const nodes = orderData?.orders?.nodes || [];
-    if (nodes.length === 0) return [];
-
-    const notifications = nodes.map(order => ({
-      firstName: order.customer?.firstName || '',
-      city: order.displayAddress?.city || '',
-      productName: order.lineItems.nodes[0]?.name || '',
-      country: order.displayAddress?.country || '',
-      productId: order.lineItems.nodes[0]?.id,
-      timestamp: new Date(order.createdAt),
-      productImage: order.lineItems.nodes[0]?.image?.url || '',
-      shopId: shopData.id,
-      shopifyDomain: shopData.shopifyDomain,
-      slug: order.lineItems.nodes[0].product.handle
-    }));
-
+    const notifications = convertOrderDataToNotifications({orderData, shopData});
     await createNotifications(notifications);
     return notifications;
   } catch (e) {

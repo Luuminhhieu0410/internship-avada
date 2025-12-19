@@ -22,6 +22,7 @@ export default function NotificationSettingsSkeleton() {
                   <SkeletonDisplayText size="small" />
                   <br />
                   <SkeletonBodyText lines={4} />
+                  <div style={{height: '340px'}}></div>
                 </div>
               </LegacyCard>
             </Layout.Section>

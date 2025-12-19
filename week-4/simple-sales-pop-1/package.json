@@ -9,7 +9,7 @@
     "deploy": "./node_modules/.bin/firebase deploy",
     "serve": "./node_modules/.bin/firebase serve",
     "shell": "./node_modules/.bin/firebase functions:shell",
-    "start": "avada app:serve -f 3000 -p 5050",
+    "start": "avada app:serve -f 5000 -p 5050",
     "logs": "./node_modules/.bin/firebase functions:log",
     "emulators": "npx kill-port 8085 && cross-env GOOGLE_APPLICATION_CREDENTIALS=serviceAccount.development.json NODE_ENV=development firebase emulators:start --only hosting,functions,pubsub",
     "predeploy": "yarn workspace @avada/assets run production && yarn workspace @avada/functions run production",

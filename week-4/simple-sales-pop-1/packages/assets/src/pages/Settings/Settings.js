@@ -88,7 +88,7 @@ export default function Settings() {
     }
   };
   const handleDiscard = () => {
-    setSettings({...initSettings});
+    setSettings(initSettings);
     shopify.saveBar.hide('my-save-bar');
   };
 

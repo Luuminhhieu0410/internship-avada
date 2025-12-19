@@ -42,7 +42,7 @@ const Notifications = () => {
   const [rejectedCsvFiles, setRejectedCsvFiles] = useState([]);
   const [errorMessageCsvUploaded, setErrorMessageCsvUploaded] = useState('');
   const [loadingUploaded, setLoadingUploaded] = useState(false);
-  const [notificationsFromAllFiles, setNotificationsFromAllFiles] = useState([]);
+
   const {
     data: notifications, // Array<Notification>
     fetchApi,
@@ -110,6 +110,7 @@ const Notifications = () => {
   useEffect(() => {
     // lấy data trang đầu tiên
     setCurrentPage(1);
+    setSelectedItems([]);
     fetchApi(null, {limit: pageSize, sortBy: sortValue});
   }, [pageSize]);
   useEffect(() => {
@@ -142,7 +143,7 @@ const Notifications = () => {
   };
   const handleSyncManually = async () => {
     await handleEdit({});
-    fetchApi(null, {limit: pageSize, sortBy: sortValue});
+    await fetchApi(null, {limit: pageSize, sortBy: sortValue});
   };
   const handleSelectChangePageSize = useCallback(value => setPageSize(Number(value)), []);
 
@@ -179,7 +180,6 @@ const Notifications = () => {
   const handleDropZoneDrop = useCallback(async (_dropFiles, acceptedFiles, _rejectedFiles) => {
     setLoadingUploaded(true);
     let convertFiles = [];
-    const allNotificationsInFiles = [];
     for (let i = 0; i < acceptedFiles.length; i++) {
       const ArrayObjectCsv = await csvDataFileToObject(acceptedFiles[i]);
       const checkValidFormat = validateCSVHeaders(
@@ -193,13 +193,7 @@ const Notifications = () => {
         time: new Date(Date.now()),
         notifi: checkValidFormat ? ArrayObjectCsv : []
       });
-      if (checkValidFormat) {
-        console.log('>>>', ArrayObjectCsv);
-        allNotificationsInFiles.push(ArrayObjectCsv);
-      }
     }
-    // allNotificationsInFiles đang la array 2 chieu
-    setNotificationsFromAllFiles(old => [...old, allNotificationsInFiles]); // array 3 chieu
     setUploadedCsvFiles(files => [...files, ...convertFiles]);
     setRejectedCsvFiles(_rejectedFiles);
     setLoadingUploaded(false);
@@ -211,10 +205,15 @@ const Notifications = () => {
   //   return under25MB;
   // }, []);
   const handleSendImportData = async () => {
-    // console.log('origin ', notificationsFromAllFiles);
-    // console.log('origin -> flat() ', notificationsFromAllFiles.flat().flat());
+    const initData = [];
+    const allNotificationsInFiles = uploadedCsvFiles.reduce((acc, currentFile) => {
+      if (currentFile.notifi.length > 0) {
+        return [...acc, currentFile.notifi];
+      }
+      return acc;
+    }, initData);
     await sendRequestDataFile({
-      notifications: notificationsFromAllFiles.flat().flat(),
+      notifications: allNotificationsInFiles.flat(),
       replace: checkBoxReplaceValue
     });
     await fetchApi(null, {limit: pageSize, endCursor, sortBy: sortValue});

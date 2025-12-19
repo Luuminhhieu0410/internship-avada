@@ -1,7 +1,7 @@
 import * as notificationRepository from '../repositories/notificationRepository';
 import {createNotifications, deleteAllNotifications} from '../repositories/notificationRepository';
 import {getCurrentShopData} from '../helpers/auth';
-import {firstSyncNotifications} from '@functions/handlers/shopify/afterLogin';
+import {syncFirstNotifications} from '@functions/handlers/shopify/afterLogin';
 
 export async function paginationNotification(ctx) {
   try {
@@ -52,7 +52,7 @@ export async function deleteNotifications(ctx) {
 export async function syncManuallyNotifications(ctx) {
   try {
     const shopData = getCurrentShopData(ctx);
-    await Promise.all([deleteAllNotifications(shopData.domain), firstSyncNotifications(shopData)]);
+    await Promise.all([deleteAllNotifications(shopData.domain), syncFirstNotifications(shopData)]);
     ctx.body = {
       success: true,
       message: 'Notifications successfully updated successfully'

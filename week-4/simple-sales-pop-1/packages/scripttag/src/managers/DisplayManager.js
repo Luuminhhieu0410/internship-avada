@@ -1,180 +1,190 @@
-import {useSignal, useSignalEffect} from '@preact/signals';
-import {formatDistanceToNow} from 'date-fns';
+import {render} from 'preact';
 import NotificationPopup from '../components/NotificationPopup/NotificationPopup';
 import {delay, stringToObjectStyle} from '../utils/utils';
+import {formatDistanceToNow} from 'date-fns';
 import './DisplayManager.css';
 
 const MAX_ITEMS_PER_POPUP = 3;
-const TIME_HIDDEN_FLOATING_ACTION_BUTTON = 15; //  15 minutes
-const STORAGE_KEY = 'timeoutCloseEnd';
+const HIDE_DURATION_MINUTES = 15;
+const STORAGE_KEY = 'sale_pop_hide_until';
 
-const isUrlMatched = (urlPatterns = '', currentPath = '') => {
-  if (!urlPatterns) return false;
-  const patterns = urlPatterns.split(',');
+export default class DisplayManager {
+  constructor() {
+    this.notifications = [];
+    this.displayItems = [];
+    this.settings = {};
 
-  return patterns.some(pattern => currentPath.includes(pattern));
-};
+    this.isOpen = false;
+    this.currentIndex = MAX_ITEMS_PER_POPUP - 1;
 
-const DisplayManager = ({notifications: initNotifications, settings}) => {
-  const allowShow = useSignal(false);
-  const notifications = useSignal(initNotifications.slice(0, settings.maxPopsDisplay));
-  const notificationsDisplay = useSignal(notifications.value.slice(0, MAX_ITEMS_PER_POPUP));
-  const isOpen = useSignal(false);
-  const position = stringToObjectStyle({position: settings.position, first: 30, second: 30});
-  const lastCurrentIndex = useSignal(MAX_ITEMS_PER_POPUP - 1);
+    this.fabContainer = null;
+    this.popupContainer = null;
+    this.buttonEl = null;
 
-  useSignalEffect(() => {
-    const currentPath = window.location.pathname;
-    const {allShow, includeUrls, excludeUrls} = settings;
-    let canShow = true;
+    this.rotationTimeout = null;
+  }
 
-    if (allShow === 'specific') {
-      // chỉ có 1 trong 2 giá trị includesUrl hoặc excludeUrl ( có 1 cái thì cái kia sẽ là string rỗng) từ backend
-      if (excludeUrls === '') {
-        // có giá trị includeUrls
-        canShow = isUrlMatched(includeUrls, currentPath);
-        // console.log('----', canShow);
-      } else {
-        canShow = !isUrlMatched(excludeUrls, currentPath);
-        // console.log('+++', canShow);
-      }
-    }
-    allowShow.value = canShow;
-  });
+  async initialize({notifications, settings}) {
+    if (this.isHiddenByTimeout()) return;
 
-  // chỉ chạy 1 lần
-  useSignalEffect(() => {
-    let cancelled = false;
+    this.notifications = notifications.slice(0, settings.maxPopsDisplay);
+    this.settings = settings;
+    if (!this.notifications.length) return;
 
+    this.insertContainers();
+    this.initPositionElement();
+    await delay(settings.firstDelay);
+    this.renderAllElements();
+  }
+
+  initPositionElement() {
+    this.positionFloatingButton();
+    this.positionPopup();
+  }
+
+  renderAllElements() {
+    this.renderFloatingActionButton();
+    this.renderPopupContent();
+    this.startRotation();
+  }
+
+  isHiddenByTimeout() {
+    const hideUntil = Number(localStorage.getItem(STORAGE_KEY));
+    return hideUntil && Date.now() < hideUntil;
+  }
+
+  closeFloatingActionButton() {
+    const hideUntil = Date.now() + HIDE_DURATION_MINUTES * 60 * 1000;
+    localStorage.setItem(STORAGE_KEY, hideUntil.toString());
+    this.destroy();
+  }
+
+  startRotation() {
     const run = async () => {
-      if (!notifications.value.length) return;
-      await delay(settings.firstDelay);
+      await delay(this.settings.displayDuration);
+      await delay(this.settings.popsInterval);
 
-      while (!cancelled) {
-        await delay(settings.displayDuration);
-        await delay(settings.popsInterval);
-        if (cancelled) break; // stop nếu effect bị cleanup
+      this.displayItems = this.getNextGroup();
+      this.renderPopupContent();
 
-        const nextIndex = (lastCurrentIndex.value + 1) % notifications.value.length; // khá hay
-        const startIndex = nextIndex - (MAX_ITEMS_PER_POPUP - 1);
-        const validStart = startIndex < 0 ? notifications.value.length + startIndex : startIndex;
-
-        const newGroup = [];
-        for (let i = 0; i < MAX_ITEMS_PER_POPUP; i++) {
-          const idx = (validStart + i) % notifications.value.length;
-          newGroup.push(notifications.value[idx]);
-        }
-
-        notificationsDisplay.value = newGroup;
-        lastCurrentIndex.value = nextIndex;
-      }
+      this.rotationTimeout = setTimeout(run, 0);
     };
-    delay(settings.firstDelay).then(() => {
-      run();
+
+    run();
+  }
+
+  getNextGroup() {
+    const nextIndex = (this.currentIndex + 1) % this.notifications.length;
+    this.currentIndex = nextIndex;
+
+    return Array.from({length: MAX_ITEMS_PER_POPUP}, (_, i) => {
+      const idx =
+        (nextIndex - (MAX_ITEMS_PER_POPUP - 1) + i + this.notifications.length) %
+        this.notifications.length;
+      return this.notifications[idx];
     });
+  }
 
-    return () => {
-      cancelled = true;
-    };
-  });
+  renderFloatingActionButton() {
+    this.fabContainer.innerHTML = '';
 
-  useSignalEffect(() => {
-    let timer;
+    const closeBtn = document.createElement('div');
+    closeBtn.innerText = '×';
+    closeBtn.className = 'popup-close';
+    closeBtn.onclick = () => this.closeFloatingActionButton();
 
-    const checkTimeout = () => {
-      const endTime = localStorage.getItem(STORAGE_KEY);
-      if (!endTime) {
-        allowShow.value = true;
-        return;
-      }
-      localStorage.setItem(STORAGE_KEY, endTime - 1000);
+    this.buttonEl = document.createElement('div');
+    this.buttonEl.className = 'popup-button';
+    this.buttonEl.onclick = () => this.togglePopup();
 
-      const remaining = endTime - Date.now();
+    this.renderButtonIcon();
 
-      if (remaining <= 0) {
-        localStorage.removeItem(STORAGE_KEY);
-        allowShow.value = true;
-      } else {
-        allowShow.value = false;
-      }
-    };
+    this.fabContainer.append(closeBtn, this.buttonEl);
+  }
 
-    checkTimeout();
-    timer = setInterval(checkTimeout, 1000);
+  renderButtonIcon() {
+    this.buttonEl.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = this.isOpen
+      ? 'https://www.svgrepo.com/show/499592/close-x.svg'
+      : 'https://icon-library.com/images/limited-time-icon/limited-time-icon-5.jpg';
+    this.buttonEl.appendChild(img);
+  }
 
-    return () => clearInterval(timer);
-  });
+  renderPopupContent() {
+    this.popupContainer.innerHTML = '';
+    this.popupContainer.classList.toggle('show', this.isOpen);
+    this.popupContainer.style.maxHeight = '285px';
+    if (this.displayItems.length <= 0) {
+      return render(
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          loading...
+        </div>,
+        this.popupContainer
+      );
+    }
+    this.displayItems.forEach(noti => {
+      const item = document.createElement('div');
+      item.className = 'popup-item';
 
-  const toggleOpenPopup = () => {
-    isOpen.value = !isOpen.value;
-  };
-  const handleCloseFloatingActionButton = () => {
-    const endTime = Date.now() + TIME_HIDDEN_FLOATING_ACTION_BUTTON * 60 * 1000;
-    localStorage.setItem(STORAGE_KEY, endTime);
-    allowShow.value = false;
-  };
+      render(
+        <NotificationPopup
+          {...noti}
+          hideTimeAgo={this.settings.hideTimeAgo}
+          relativeDate={formatDistanceToNow(noti.timestamp, {addSuffix: true})}
+        />,
+        item
+      );
 
-  return (
-    <div>
-      {allowShow.value && (
-        <div
-          className="popup"
-          style={{
-            position: 'fixed',
-            ...position,
-            zIndex: 99
-          }}
-        >
-          <div
-            onClick={handleCloseFloatingActionButton}
-            style={{
-              position: 'absolute',
-              top: -20,
-              right: -5,
-              color: 'red',
-              cursor: 'pointer',
-              fontSize: '24px'
-            }}
-          >
-            x
-          </div>
+      this.popupContainer.appendChild(item);
+    });
+  }
 
-          <div className="popup-button" onClick={toggleOpenPopup}>
-            {!isOpen.value ? (
-              <img
-                src="https://icon-library.com/images/limited-time-icon/limited-time-icon-5.jpg"
-                alt="popup-icon"
-              />
-            ) : (
-              <img src="https://www.svgrepo.com/show/499592/close-x.svg" alt="popup-icon" />
-            )}
-          </div>
+  togglePopup() {
+    this.isOpen = !this.isOpen;
+    this.renderButtonIcon();
+    this.popupContainer.classList.toggle('show', this.isOpen);
+  }
 
-          <div
-            className={`popup-content ${isOpen.value ? 'show' : ''}`}
-            style={{...stringToObjectStyle({position: settings.position, first: 70})}}
-          >
-            {notificationsDisplay.value.length > 0 ? (
-              notificationsDisplay.value.map((notification, idx) => (
-                <div key={idx} className="popup-item">
-                  <NotificationPopup
-                    {...notification}
-                    position={position}
-                    hideTimeAgo={settings.hideTimeAgo}
-                    relativeDate={formatDistanceToNow(notification.timestamp, {
-                      addSuffix: true
-                    })}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="popup-empty">Không có thông báo nào</div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+  positionFloatingButton() {
+    Object.assign(this.fabContainer.style, {
+      position: 'fixed',
+      zIndex: 100,
+      ...stringToObjectStyle({
+        position: this.settings.position,
+        first: 30,
+        second: 20
+      })
+    });
+  }
 
-export default DisplayManager;
+  positionPopup() {
+    const pos = this.settings.position;
+
+    Object.assign(this.popupContainer.style, {
+      position: 'fixed',
+      zIndex: 99,
+      ...(pos.includes('bottom') && {bottom: '80px'}),
+      ...(pos.includes('top') && {top: '80px'}),
+      ...(pos.includes('right') && {right: '20px'}),
+      ...(pos.includes('left') && {left: '20px'})
+    });
+  }
+
+  insertContainers() {
+    this.fabContainer = document.createElement('div');
+    this.fabContainer.id = 'Avada-SalePop-FAB';
+
+    this.popupContainer = document.createElement('div');
+    this.popupContainer.id = 'Avada-SalePop-Popup';
+    this.popupContainer.className = 'popup-content';
+
+    document.body.append(this.fabContainer, this.popupContainer);
+  }
+
+  destroy() {
+    clearTimeout(this.rotationTimeout);
+    this.fabContainer?.remove();
+    this.popupContainer?.remove();
+  }
+}
